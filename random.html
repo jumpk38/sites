@@ -1,78 +1,177 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>発表順キメマス</title>
   <style>
     body {
-      background-color: #e5ddff;
-      font-family: sans-serif;
-      max-width: 400px;
-      margin: 50px auto;
+      background-color: #e5ddff; /* 指定の背景色 */
+      font-family: 'Comic Sans MS', cursive, sans-serif; /* web1.0感 */
+      max-width: 480px;
+      margin: 40px auto;
       text-align: center;
       color: #ffffff;
     }
-    /* タイトルを左右にチカチカ動かす marquee */
+
+    /* 見出しをmarqueeでチラつかせつつ斜体に */
     marquee h1 {
       margin: 0;
       font-size: 32px;
       color: #00ffff;
       text-shadow: 2px 2px #ff00ff, -2px -2px #ffff00;
-      font-style: italic;
+      font-style: italic; /* 斜体 */
     }
+
+    .input-block {
+      background: linear-gradient(to bottom, #fff, #ffd);
+      border: 3px ridge #ff00ff;
+      color: #000;
+      padding: 12px;
+      margin-top: 18px;
+      box-shadow: inset 2px 2px 0 #fff, 2px 2px 0 #000;
+    }
+    .input-block h2 {
+      margin: 6px 0;
+      font-size: 18px;
+      color: #9900cc;
+      text-shadow: 1px 1px #fff;
+    }
+    .input-block .note {
+      margin: 4px 0 8px;
+      font-size: 12px;
+      color: #444;
+    }
+    textarea {
+      width: 96%;
+      height: 180px; /* 10件まで入力しやすい高さ */
+      resize: vertical;
+      border: 3px groove #00ccff;
+      padding: 6px;
+      font-family: monospace;
+      line-height: 1.4;
+      background: #fffff0;
+      outline: none;
+      box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #ccc;
+    }
+
     /* ダサいボタン装飾 */
-    #shuffleButton {
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    button {
       background: linear-gradient(to bottom, #ffff00, #ff0000);
       border: 3px double #00ff00;
       color: #0000ff;
       font-family: 'Comic Sans MS', cursive, sans-serif;
       text-shadow: 1px 1px #ffffff;
       box-shadow: inset 2px 2px 0 #ffffff, 2px 2px 0 #000000;
-      padding: 10px 20px;
-      font-size: 18px;
+      padding: 8px 14px;
+      font-size: 16px;
       cursor: pointer;
-      margin-top: 10px;
     }
-    #shuffleButton:hover {
-      background: linear-gradient(to bottom, #ff0000, #ffff00);
-    }
-    /* 結果リスト */
+    button:hover { background: linear-gradient(to bottom, #ff0000, #ffff00); }
+    button:disabled { filter: grayscale(50%); cursor: not-allowed; }
+
+    /* 結果リスト：10件までは崩れにくいように最低高さを確保 */
     #result {
       list-style: none;
       padding: 0;
-      margin-top: 20px;
+      margin-top: 16px;
       text-align: left;
-      min-height: 200px; /* 9行分 */
+      min-height: 300px; /* だいたい10行ぶんの余白（<=10で崩れにくい） */
+      background: #fff;
+      border: 3px groove #ff66ff;
+      box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #ccc;
     }
     #result li {
-      padding: 5px 0;
-      border-bottom: 1px dotted #ffffff;
-      color: #333;
+      padding: 6px 10px;
+      border-bottom: 1px dotted #cccccc;
+      color: #333; /* 指定：メンバー名の文字色 */
+      font-weight: bold;
+    }
+
+    /* 補助のラベル */
+    .hint {
+      color: #222;
+      background: #fff8c6;
+      display: inline-block;
+      padding: 4px 8px;
+      border: 2px dashed #ff00ff;
+      margin-top: 8px;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
   <marquee behavior="alternate" scrollamount="10"><h1>発表順キメマス</h1></marquee>
-  <button id="shuffleButton">順番を決める</button>
+
+  <div class="input-block">
+    <h2>ここに名前を入力してください。</h2>
+    <p class="note">改行ごとに1名として扱います。名前はサーバーに保持しません。</p>
+    <textarea id="namesInput" placeholder="例：&#10;Aさん&#10;Bさん&#10;Cさん&#10;...&#10;（改行ごとに1名）"></textarea>
+    <div class="btn-row">
+      <button id="applyNames">名前を保存して適用</button>
+      <button id="clearNames" title="保存済みの名前を削除して初期化します">保存内容を消去</button>
+    </div>
+  </div>
+
+  <div class="btn-row" style="margin-top:16px;">
+    <button id="shuffleButton">順番を決める</button>
+  </div>
+
   <ul id="result"></ul>
 
   <script>
     // ────────────────────
-    // メンバー定義エリア（ここを書き換えてください）
-    const members = [
-      'Aさん',
-      'Bさん',
-      'Cさん',
-      'Dさん',
-      'Eさん',
-      'Fさん',
-      'Gさん',
-      'Hさん',
-      'Iさん'
+    // メンバー定義エリア（Aの入力を反映。未入力時の初期値）
+    const defaultMembers = [
+      'Aさん','Bさん','Cさん','Dさん','Eさん',
+      'Fさん','Gさん','Hさん','Iさん'
     ];
+    let members = defaultMembers.slice(); // この変数が常に現在のメンバー
     // ────────────────────
 
-    // Fisher–Yates シャッフル
+    // 保存先：ローカルのみ（サーバー送信なし）
+    const STORAGE_KEY = 'memberNames_v1';
+
+    function parseInputToMembers(text) {
+      return text
+        .split(/\r?\n/)
+        .map(s => s.trim())
+        .filter(Boolean);
+    }
+
+    function saveMembersLocally(list) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      } catch (e) {
+        // localStorageが使えない環境向けにcookie fallback（一年保存）
+        document.cookie = STORAGE_KEY + '=' + encodeURIComponent(JSON.stringify(list)) +
+          '; max-age=31536000; path=/; SameSite=Lax';
+      }
+    }
+
+    function loadMembersLocally() {
+      // 1) localStorage
+      try {
+        const s = localStorage.getItem(STORAGE_KEY);
+        if (s) return JSON.parse(s);
+      } catch (e) {}
+      // 2) cookie
+      const row = document.cookie.split('; ').find(r => r.startsWith(STORAGE_KEY + '='));
+      if (row) {
+        try {
+          return JSON.parse(decodeURIComponent(row.split('=')[1]));
+        } catch (e) {}
+      }
+      return null;
+    }
+
+    // Fisher–Yates シャッフル（純粋関数）
     function shuffled(arr) {
       const a = arr.slice();
       for (let i = a.length - 1; i > 0; i--) {
@@ -82,31 +181,90 @@
       return a;
     }
 
-    const btn = document.getElementById('shuffleButton');
+    const textarea = document.getElementById('namesInput');
+    const applyBtn = document.getElementById('applyNames');
+    const clearBtn = document.getElementById('clearNames');
+    const shuffleBtn = document.getElementById('shuffleButton');
     const resultEl = document.getElementById('result');
 
-    btn.addEventListener('click', () => {
-      btn.disabled = true;
+    // 初期ロード：保存済みがあれば反映
+    (function initMembersFromStorage() {
+      const saved = loadMembersLocally();
+      if (Array.isArray(saved) && saved.length) {
+        members = saved.slice();
+        textarea.value = members.join('\n');
+      } else {
+        // 未保存なら初期値をプレースホルダ代わりに表示
+        textarea.value = defaultMembers.join('\n');
+        members = defaultMembers.slice();
+      }
+    })();
+
+    // 適用ボタン：A(テキストエリア)の内容をメンバー定義へ反映＆ローカル保存
+    applyBtn.addEventListener('click', () => {
+      const list = parseInputToMembers(textarea.value);
+      // 11件以上も許容（仕様：想定外→スタイル崩れ許容）
+      if (!list.length) {
+        alert('名前がありません。最低1件は入力してください。');
+        return;
+      }
+      members = list;
+      saveMembersLocally(list);
+      flashSaved();
+    });
+
+    // 消去ボタン：保存内容をクリアして初期状態へ
+    clearBtn.addEventListener('click', () => {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      // cookieも消す
+      document.cookie = STORAGE_KEY + '=; max-age=0; path=/; SameSite=Lax';
+      members = defaultMembers.slice();
+      textarea.value = defaultMembers.join('\n');
+      flashSaved('保存内容を消去しました（初期状態に戻しました）');
+    });
+
+    // 保存・適用時の軽いフィードバック
+    function flashSaved(text) {
+      const note = document.createElement('div');
+      note.textContent = text || '保存して適用しました';
+      note.style.cssText =
+        'margin-top:8px;color:#008000;background:#e6ffe6;border:2px dotted #00aa00;display:inline-block;padding:4px 8px;';
+      textarea.parentNode.appendChild(note);
+      setTimeout(() => note.remove(), 1500);
+    }
+
+    // 0.2秒ごとにランダムに入れ替え → 2秒後に最終決定
+    shuffleBtn.addEventListener('click', () => {
+      if (!members.length) return;
+      shuffleBtn.disabled = true;
       resultEl.innerHTML = '';
 
-      // 0.2秒ごとにランダムに入れ替え
       const intervalId = setInterval(() => {
         const list = shuffled(members);
         resultEl.innerHTML = list
-          .map((name, idx) => `<li>${idx + 1}. ${name}</li>`)
+          .map((name, idx) => `<li>${idx + 1}. ${escapeHtml(name)}</li>`)
           .join('');
       }, 200);
 
-      // 2秒後にアニメーション停止＆最終決定
       setTimeout(() => {
         clearInterval(intervalId);
         const finalOrder = shuffled(members);
         resultEl.innerHTML = finalOrder
-          .map((name, idx) => `<li>${idx + 1}. ${name}</li>`)
+          .map((name, idx) => `<li>${idx + 1}. ${escapeHtml(name)}</li>`)
           .join('');
-        btn.disabled = false;
+        shuffleBtn.disabled = false;
       }, 2000);
     });
+
+    // XSS対策のエスケープ（名前入力は信頼しない）
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
   </script>
 </body>
 </html>

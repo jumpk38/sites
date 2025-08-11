@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>発表順キメマス</title>
+  <style>
+    body {
+      background-color: #e5ddff;
+      font-family: sans-serif;
+      max-width: 400px;
+      margin: 50px auto;
+      text-align: center;
+      color: #ffffff;
+    }
+    /* タイトルを左右にチカチカ動かす marquee */
+    marquee h1 {
+      margin: 0;
+      font-size: 32px;
+      color: #00ffff;
+      text-shadow: 2px 2px #ff00ff, -2px -2px #ffff00;
+      font-style: italic;
+    }
+    /* ダサいボタン装飾 */
+    #shuffleButton {
+      background: linear-gradient(to bottom, #ffff00, #ff0000);
+      border: 3px double #00ff00;
+      color: #0000ff;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      text-shadow: 1px 1px #ffffff;
+      box-shadow: inset 2px 2px 0 #ffffff, 2px 2px 0 #000000;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #shuffleButton:hover {
+      background: linear-gradient(to bottom, #ff0000, #ffff00);
+    }
+    /* 結果リスト */
+    #result {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+      text-align: left;
+      min-height: 200px; /* 9行分 */
+    }
+    #result li {
+      padding: 5px 0;
+      border-bottom: 1px dotted #ffffff;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <marquee behavior="alternate" scrollamount="10"><h1>発表順キメマス</h1></marquee>
+  <button id="shuffleButton">順番を決める</button>
+  <ul id="result"></ul>
+
+  <script>
+    // ────────────────────
+    // メンバー定義エリア（ここを書き換えてください）
+    const members = [
+      'Aさん',
+      'Bさん',
+      'Cさん',
+      'Dさん',
+      'Eさん',
+      'Fさん',
+      'Gさん',
+      'Hさん',
+      'Iさん'
+    ];
+    // ────────────────────
+
+    // Fisher–Yates シャッフル
+    function shuffled(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const btn = document.getElementById('shuffleButton');
+    const resultEl = document.getElementById('result');
+
+    btn.addEventListener('click', () => {
+      btn.disabled = true;
+      resultEl.innerHTML = '';
+
+      // 0.2秒ごとにランダムに入れ替え
+      const intervalId = setInterval(() => {
+        const list = shuffled(members);
+        resultEl.innerHTML = list
+          .map((name, idx) => `<li>${idx + 1}. ${name}</li>`)
+          .join('');
+      }, 200);
+
+      // 2秒後にアニメーション停止＆最終決定
+      setTimeout(() => {
+        clearInterval(intervalId);
+        const finalOrder = shuffled(members);
+        resultEl.innerHTML = finalOrder
+          .map((name, idx) => `<li>${idx + 1}. ${name}</li>`)
+          .join('');
+        btn.disabled = false;
+      }, 2000);
+    });
+  </script>
+</body>
+</html>

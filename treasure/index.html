@@ -26,7 +26,6 @@
         radial-gradient(1200px 800px at 50% -10%, rgba(215,183,90,.35), transparent 60%),
         radial-gradient(800px 600px at 100% 120%, rgba(192,57,43,.25), transparent 60%),
         linear-gradient(180deg, #1a1525, #0d0b11);
-      display:flex; align-items:center; justify-content:center;
     }
     .frame{
       width:min(680px, 92vw);
@@ -41,6 +40,7 @@
       background-image: radial-gradient(1200px 600px at -10% -20%, rgba(255,255,255,.35), rgba(255,255,255,0)),
                        radial-gradient(800px 400px at 120% 120%, rgba(255,255,255,.25), rgba(255,255,255,0)),
                        repeating-linear-gradient(135deg, rgba(0,0,0,.03) 0 8px, rgba(0,0,0,0) 8px 16px);
+      margin: 16px auto; /* 上寄せ＋横中央 */
     }
     .border-corners:before, .border-corners:after{
       content:""; position:absolute; inset:8px; border:2px dashed rgba(59,47,27,.25); border-radius:14px; pointer-events:none;

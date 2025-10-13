@@ -73,10 +73,10 @@
     .btn:disabled{ opacity:.5; filter:grayscale(.2); pointer-events:none; }
 
     /* Result Modals */
-    .modal{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; }
+    .modal{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:999; }
     .modal.show{ display:flex; }
     .backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.5); backdrop-filter: blur(2px); }
-    .card{ position:relative; width:min(520px, 92%); background:#fff8ec; border:3px solid var(--gold); outline:2px solid var(--gold-dark); border-radius:16px; padding:18px; box-shadow: 0 24px 60px rgba(0,0,0,.35); text-align:center; }
+    .card{ position:relative; z-index:1000; width:min(520px, 92%); background:#fff8ec; border:3px solid var(--gold); outline:2px solid var(--gold-dark); border-radius:16px; padding:18px; box-shadow: 0 24px 60px rgba(0,0,0,.35); text-align:center; }
     .card h2{ font-family:"Georgia",serif; font-size:clamp(20px, 6vw, 28px); margin:0 0 8px; }
     .card p{ margin:6px 0 16px; font-size:clamp(14px, 4.4vw, 16px); color:#46351d; }
     .card .row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }

@@ -45,78 +45,49 @@
     .border-corners:before, .border-corners:after{
       content:""; position:absolute; inset:8px; border:2px dashed rgba(59,47,27,.25); border-radius:14px; pointer-events:none;
     }
-    header{ text-align:center; }
+    header{ text-align:center; position:relative; z-index:1; }
     h1{
       margin:.1rem 0 .4rem; color:var(--accent);
-      font-family: "Georgia", "Times New Roman", serif; font-weight:900; letter-spacing:.06em;
+      font-family: "Georgia", "Times New Roman", serif; font-weight:800; letter-spacing:.06em;
       text-shadow:0 1px 0 #fff3, 0 2px 0 #fff1;
       font-size:clamp(22px, 6vw, 34px);
+      line-height:1.2;
     }
-    .lead{
-      font-size:clamp(14px, 4.2vw, 16px);
-      color:#4a3a22; line-height:1.6; margin-bottom:14px;
-    }
-    .hero{
-      display:grid; place-items:center; margin:6px 0 14px;
-    }
-    /* Treasure chest SVG */
-    .chest{
-      width:min(420px, 78vw); filter: drop-shadow(0 16px 24px rgba(0,0,0,.25));
-    }
-    /* PIN display */
-    .display{
-      display:flex; gap:10px; justify-content:center; margin: 10px 0 14px;
-    }
-    .slot{
-      width:56px; height:56px; border-radius:12px;
-      background:#fff; border:2px solid rgba(0,0,0,.12);
-      box-shadow: inset 0 2px 6px rgba(0,0,0,.08);
-      display:grid; place-items:center; font-weight:800; font-size:24px; color:#2b2115;
-    }
+    .lead{ position:relative; z-index:1; font-size:clamp(14px, 4.2vw, 16px); color:#4a3a22; line-height:1.6; margin-bottom:14px; }
+    .hero{ display:grid; place-items:center; margin:6px 0 14px; position:relative; z-index:1; }
+    .chest{ width:min(420px, 78vw); filter: drop-shadow(0 16px 24px rgba(0,0,0,.25)); }
+
+    .display{ display:flex; gap:10px; justify-content:center; margin: 10px 0 14px; position:relative; z-index:1; }
+    .slot{ width:56px; height:56px; border-radius:12px; background:#fff; border:2px solid rgba(0,0,0,.12); box-shadow: inset 0 2px 6px rgba(0,0,0,.08); display:grid; place-items:center; font-weight:800; font-size:24px; color:#2b2115; }
     @media (max-width:420px){ .slot{ width:52px; height:52px; font-size:22px; } }
 
-    /* Keypad */
-    .pad{
-      display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:min(420px, 92%); margin:0 auto;
-    }
-    .key{
-      -webkit-tap-highlight-color: transparent;
-      user-select:none; touch-action:manipulation;
-      background: linear-gradient(#fff, #f3e9d2);
-      border:2px solid rgba(0,0,0,.12);
-      border-radius:14px; height:62px; font-size:22px; font-weight:800; color:#2b2115;
-      box-shadow: 0 3px 0 #c9bda1, 0 6px 16px rgba(0,0,0,.08);
-      display:grid; place-items:center;
-    }
+    .pad{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:min(420px, 92%); margin:0 auto; position:relative; z-index:1; }
+    .key{ -webkit-tap-highlight-color: transparent; user-select:none; touch-action:manipulation; background: linear-gradient(#fff, #f3e9d2); border:2px solid rgba(0,0,0,.12); border-radius:14px; height:62px; font-size:22px; font-weight:800; color:#2b2115; box-shadow: 0 3px 0 #c9bda1, 0 6px 16px rgba(0,0,0,.08); display:grid; place-items:center; }
     .key:active{ transform: translateY(2px); box-shadow: 0 1px 0 #c9bda1, 0 3px 10px rgba(0,0,0,.12); }
 
-    .actions{
-      display:grid; grid-template-columns:1fr 1fr; gap:10px; width:min(420px, 92%); margin:12px auto 0;
-    }
-    .btn{
-      -webkit-tap-highlight-color: transparent;
-      background: linear-gradient(#fff, #f7ead0);
-      border:2px solid rgba(0,0,0,.12);
-      border-radius:14px; height:56px; font-size:18px; font-weight:800; color:#2b2115;
-      box-shadow: 0 3px 0 #c9bda1, 0 6px 16px rgba(0,0,0,.08);
-      display:grid; place-items:center;
-    }
+    .actions{ display:grid; grid-template-columns:1fr 1fr; gap:10px; width:min(420px, 92%); margin:12px auto 0; position:relative; z-index:1; }
+    .btn{ -webkit-tap-highlight-color: transparent; background: linear-gradient(#fff, #f7ead0); border:2px solid rgba(0,0,0,.12); border-radius:14px; height:56px; font-size:18px; font-weight:800; color:#2b2115; box-shadow: 0 3px 0 #c9bda1, 0 6px 16px rgba(0,0,0,.08); display:grid; place-items:center; }
     .btn.primary{ background: linear-gradient(#ffeaa7, #ffd76a); border-color:#e0c15a; box-shadow: 0 3px 0 #c6a94a, 0 6px 16px rgba(0,0,0,.08); }
     .btn.danger{ background: linear-gradient(#ffd6d1, #f9bbb3); border-color:#e6a29b; box-shadow: 0 3px 0 #d18e87, 0 6px 16px rgba(0,0,0,.08); }
     .btn:active{ transform: translateY(2px); }
     .btn:disabled{ opacity:.5; filter:grayscale(.2); pointer-events:none; }
 
-    /* Result states */
-    .result{ display:none; text-align:center; padding: 10px 6px 6px; }
-    .result.show{ display:block; }
-    .result h2{ font-family: "Georgia", serif; font-size: clamp(20px, 5.8vw, 28px); margin:8px 0 6px; }
-    .result p{ margin:6px 0 14px; font-size:clamp(14px, 4.2vw, 16px); }
-    .success h2{ color:#116e2d; text-shadow:0 1px 0 #fff8; }
-    .fail h2{ color:#8a1e13; text-shadow:0 1px 0 #fff8; }
+    /* Result Modals */
+    .modal{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; }
+    .modal.show{ display:flex; }
+    .backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.5); backdrop-filter: blur(2px); }
+    .card{ position:relative; width:min(520px, 92%); background:#fff8ec; border:3px solid var(--gold); outline:2px solid var(--gold-dark); border-radius:16px; padding:18px; box-shadow: 0 24px 60px rgba(0,0,0,.35); text-align:center; }
+    .card h2{ font-family:"Georgia",serif; font-size:clamp(20px, 6vw, 28px); margin:0 0 8px; }
+    .card p{ margin:6px 0 16px; font-size:clamp(14px, 4.4vw, 16px); color:#46351d; }
+    .card .row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+    .card .full{ display:block; width:100%; margin-top:10px; }
+    .success .card h2{ color:#116e2d; }
+    .fail .card h2{ color:#8a1e13; }
+
     .shake{ animation: shake .35s linear; }
     @keyframes shake { 0%,100%{ transform:translateX(0);} 20%{ transform:translateX(-6px);} 40%{ transform:translateX(6px);} 60%{ transform:translateX(-4px);} 80%{ transform:translateX(4px);} }
 
-    footer{ text-align:center; opacity:.7; font-size:12px; margin-top:12px; }
+    footer{ text-align:center; opacity:.7; font-size:12px; margin-top:12px; position:relative; z-index:1; }
     .hint{ display:none; }
   </style>
 </head>
@@ -177,15 +148,27 @@
       <button class="btn primary" id="enterBtn" disabled>けってい</button>
     </div>
 
-    <!-- Results -->
-    <section class="result success" id="successPanel" role="status" aria-live="polite">
-      <h2>おめでとう！</h2>
-      <p>この画面を受付の人に見せてね 🎉</p>
-    </section>
-    <section class="result fail" id="failPanel" role="status" aria-live="polite">
-      <h2>ざんねん！もう一度チャレンジ！</h2>
-      <p><button class="btn" id="retryBtn">最初の画面にもどる</button></p>
-    </section>
+    <!-- Modals -->
+    <div class="modal success" id="successModal" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+      <div class="backdrop"></div>
+      <div class="card" role="document">
+        <h2 id="successTitle">おめでとう！</h2>
+        <p>この画面を受付の人に見せてね。スタッフが確認するまで、このまま表示しておいてください。</p>
+        <button class="btn primary full" id="successOk">OK</button>
+      </div>
+    </div>
+
+    <div class="modal fail" id="failModal" role="dialog" aria-modal="true" aria-labelledby="failTitle">
+      <div class="backdrop"></div>
+      <div class="card" role="document">
+        <h2 id="failTitle">ざんねん！もう一度チャレンジ！</h2>
+        <p>ヒントを見直して、4ケタの番号をもう一度入力してね。</p>
+        <div class="row">
+          <button class="btn danger" id="retryBtn">最初の画面にもどる</button>
+          <button class="btn" id="closeFail">閉じる</button>
+        </div>
+      </div>
+    </div>
 
     <footer>
       <span class="hint" id="hint"></span>
@@ -214,8 +197,10 @@
     const clearBtn = document.getElementById('clearBtn');
     const enterBtn = document.getElementById('enterBtn');
     const retryBtn = document.getElementById('retryBtn');
-    const successPanel = document.getElementById('successPanel');
-    const failPanel = document.getElementById('failPanel');
+    const successModal = document.getElementById('successModal');
+    const failModal = document.getElementById('failModal');
+    const successOk = document.getElementById('successOk');
+    const closeFail = document.getElementById('closeFail');
 
     let input = [];
 
@@ -234,20 +219,16 @@
       if (input.length !== 4) return;
       const code = input.join('');
       if (code === ANSWER){
-        successPanel.classList.add('show');
-        failPanel.classList.remove('show');
-        // 視覚的な演出（簡易キラッ）
+        // 成功モーダル
         display.classList.remove('shake');
         display.style.transition = 'box-shadow .25s ease';
         display.style.boxShadow = '0 0 0 4px rgba(46, 204, 113, .35)';
+        openModal(successModal);
       } else {
-        // 失敗演出
-        successPanel.classList.remove('show');
-        failPanel.classList.add('show');
+        // 失敗モーダル
         display.classList.add('shake');
         setTimeout(()=>display.classList.remove('shake'), 400);
-        // 自動で入力を消す場合は次の行のコメントを外す
-        // clearAll();
+        openModal(failModal);
       }
     }
 
@@ -258,16 +239,30 @@
 
     clearBtn.addEventListener('click', clearAll);
     enterBtn.addEventListener('click', check);
-    retryBtn.addEventListener('click', () =>{
-      clearAll();
-      successPanel.classList.remove('show');
-      failPanel.classList.remove('show');
-      display.style.boxShadow = 'none';
-    });
+
+    // モーダル操作
+    function openModal(el){ el.classList.add('show'); }
+    function closeModal(el){ el.classList.remove('show'); }
+
+    // 成功OKでモーダルを閉じる
+    successOk.addEventListener('click', ()=> closeModal(successModal));
+
+    // 失敗：閉じる（入力は残る）
+    closeFail.addEventListener('click', ()=> closeModal(failModal));
+
+    // 失敗：最初の画面にもどる → リロードで完全初期化
+    document.getElementById('retryBtn').addEventListener('click', ()=>{ location.reload(); });
 
     // 物理キーボードの誤操作を防ぐ（スマホ中心想定）
     window.addEventListener('keydown', (e)=>{
-      // 数字キーやEnter等は無効化
+      if (/^\\d$/.test(e.key) || e.key === 'Enter' || e.key === 'Backspace'){
+        e.preventDefault();
+      }
+    }, { passive:false });
+
+    // 初期描画
+    render();
+  </script> window.addEventListener('keydown', (e)=>{
       if (/^\d$/.test(e.key) || e.key === 'Enter' || e.key === 'Backspace'){
         e.preventDefault();
       }
@@ -278,3 +273,4 @@
   </script>
 </body>
 </html>
+

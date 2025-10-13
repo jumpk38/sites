@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>宝箱を開けよう！</title>
+  <meta name="description" content="謎解きイベント用ワンページ。4ケタの番号を入力して宝箱を開けよう！" />
+  <style>
+    :root{
+      --bg:#0d0b11;
+      --parchment:#f2e6c9;
+      --ink:#3b2f1b;
+      --gold:#d7b75a;
+      --gold-dark:#a8892f;
+      --ruby:#c0392b;
+      --emerald:#2ecc71;
+      --shadow:rgba(0,0,0,.35);
+      --accent:#6a4c2a;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: ui-rounded, system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 800px at 50% -10%, rgba(215,183,90,.35), transparent 60%),
+        radial-gradient(800px 600px at 100% 120%, rgba(192,57,43,.25), transparent 60%),
+        linear-gradient(180deg, #1a1525, #0d0b11);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .frame{
+      width:min(680px, 92vw);
+      background:var(--parchment);
+      border-radius:20px;
+      box-shadow:0 20px 60px var(--shadow), inset 0 0 0 2px rgba(0,0,0,.06);
+      padding: clamp(16px, 4vw, 28px);
+      position:relative;
+      overflow:hidden;
+      border: 6px solid var(--gold);
+      outline: 2px solid var(--gold-dark);
+      background-image: radial-gradient(1200px 600px at -10% -20%, rgba(255,255,255,.35), rgba(255,255,255,0)),
+                       radial-gradient(800px 400px at 120% 120%, rgba(255,255,255,.25), rgba(255,255,255,0)),
+                       repeating-linear-gradient(135deg, rgba(0,0,0,.03) 0 8px, rgba(0,0,0,0) 8px 16px);
+    }
+    .border-corners:before, .border-corners:after{
+      content:""; position:absolute; inset:8px; border:2px dashed rgba(59,47,27,.25); border-radius:14px; pointer-events:none;
+    }
+    header{ text-align:center; }
+    h1{
+      margin:.1rem 0 .4rem; color:var(--accent);
+      font-family: "Georgia", "Times New Roman", serif; font-weight:900; letter-spacing:.06em;
+      text-shadow:0 1px 0 #fff3, 0 2px 0 #fff1;
+      font-size:clamp(22px, 6vw, 34px);
+    }
+    .lead{
+      font-size:clamp(14px, 4.2vw, 16px);
+      color:#4a3a22; line-height:1.6; margin-bottom:14px;
+    }
+    .hero{
+      display:grid; place-items:center; margin:6px 0 14px;
+    }
+    /* Treasure chest SVG */
+    .chest{
+      width:min(420px, 78vw); filter: drop-shadow(0 16px 24px rgba(0,0,0,.25));
+    }
+    /* PIN display */
+    .display{
+      display:flex; gap:10px; justify-content:center; margin: 10px 0 14px;
+    }
+    .slot{
+      width:56px; height:56px; border-radius:12px;
+      background:#fff; border:2px solid rgba(0,0,0,.12);
+      box-shadow: inset 0 2px 6px rgba(0,0,0,.08);
+      display:grid; place-items:center; font-weight:800; font-size:24px; color:#2b2115;
+    }
+    @media (max-width:420px){ .slot{ width:52px; height:52px; font-size:22px; } }
+
+    /* Keypad */
+    .pad{
+      display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:min(420px, 92%); margin:0 auto;
+    }
+    .key{
+      -webkit-tap-highlight-color: transparent;
+      user-select:none; touch-action:manipulation;
+      background: linear-gradient(#fff, #f3e9d2);
+      border:2px solid rgba(0,0,0,.12);
+      border-radius:14px; height:62px; font-size:22px; font-weight:800; color:#2b2115;
+      box-shadow: 0 3px 0 #c9bda1, 0 6px 16px rgba(0,0,0,.08);
+      display:grid; place-items:center;
+    }
+    .key:active{ transform: translateY(2px); box-shadow: 0 1px 0 #c9bda1, 0 3px 10px rgba(0,0,0,.12); }
+
+    .actions{
+      display:grid; grid-template-columns:1fr 1fr; gap:10px; width:min(420px, 92%); margin:12px auto 0;
+    }
+    .btn{
+      -webkit-tap-highlight-color: transparent;
+      background: linear-gradient(#fff, #f7ead0);
+      border:2px solid rgba(0,0,0,.12);
+      border-radius:14px; height:56px; font-size:18px; font-weight:800; color:#2b2115;
+      box-shadow: 0 3px 0 #c9bda1, 0 6px 16px rgba(0,0,0,.08);
+      display:grid; place-items:center;
+    }
+    .btn.primary{ background: linear-gradient(#ffeaa7, #ffd76a); border-color:#e0c15a; box-shadow: 0 3px 0 #c6a94a, 0 6px 16px rgba(0,0,0,.08); }
+    .btn.danger{ background: linear-gradient(#ffd6d1, #f9bbb3); border-color:#e6a29b; box-shadow: 0 3px 0 #d18e87, 0 6px 16px rgba(0,0,0,.08); }
+    .btn:active{ transform: translateY(2px); }
+    .btn:disabled{ opacity:.5; filter:grayscale(.2); pointer-events:none; }
+
+    /* Result states */
+    .result{ display:none; text-align:center; padding: 10px 6px 6px; }
+    .result.show{ display:block; }
+    .result h2{ font-family: "Georgia", serif; font-size: clamp(20px, 5.8vw, 28px); margin:8px 0 6px; }
+    .result p{ margin:6px 0 14px; font-size:clamp(14px, 4.2vw, 16px); }
+    .success h2{ color:#116e2d; text-shadow:0 1px 0 #fff8; }
+    .fail h2{ color:#8a1e13; text-shadow:0 1px 0 #fff8; }
+    .shake{ animation: shake .35s linear; }
+    @keyframes shake { 0%,100%{ transform:translateX(0);} 20%{ transform:translateX(-6px);} 40%{ transform:translateX(6px);} 60%{ transform:translateX(-4px);} 80%{ transform:translateX(4px);} }
+
+    footer{ text-align:center; opacity:.7; font-size:12px; margin-top:12px; }
+    .hint{ display:none; }
+  </style>
+</head>
+<body>
+  <main class="frame border-corners" id="app" aria-live="polite">
+    <header>
+      <h1>宝箱を開けよう！</h1>
+      <p class="lead">宝のカギとなる、4ケタの番号を入力してね。</p>
+    </header>
+
+    <section class="hero" aria-hidden="true">
+      <!-- Inline SVG treasure chest for a self-contained file -->
+      <svg class="chest" viewBox="0 0 512 320" role="img" aria-label="宝箱のイラスト" xmlns="http://www.w3.org/2000/svg">
+        <!-- base shadow -->
+        <ellipse cx="256" cy="300" rx="180" ry="14" fill="rgba(0,0,0,.18)"/>
+        <!-- chest body -->
+        <rect x="64" y="120" width="384" height="140" rx="16" fill="#7b4a20" stroke="#4e2f13" stroke-width="6"/>
+        <rect x="64" y="120" width="384" height="36" fill="#603813" opacity=".5"/>
+        <!-- metal bands -->
+        <rect x="120" y="120" width="16" height="140" fill="#caa34d"/>
+        <rect x="240" y="120" width="16" height="140" fill="#caa34d"/>
+        <rect x="376" y="120" width="16" height="140" fill="#caa34d"/>
+        <!-- lid -->
+        <path d="M64 120c0-66 86-104 192-104s192 38 192 104H64z" fill="#7b4a20" stroke="#4e2f13" stroke-width="6"/>
+        <path d="M64 120h384" stroke="#4e2f13" stroke-width="6"/>
+        <!-- lock plate -->
+        <rect x="236" y="162" width="40" height="74" rx="6" fill="#f2d166" stroke="#a8892f" stroke-width="5"/>
+        <circle cx="256" cy="206" r="8" fill="#4e2f13"/>
+      </svg>
+    </section>
+
+    <!-- PIN display -->
+    <div class="display" id="display" aria-label="入力された数字">
+      <div class="slot" data-idx="0">&nbsp;</div>
+      <div class="slot" data-idx="1">&nbsp;</div>
+      <div class="slot" data-idx="2">&nbsp;</div>
+      <div class="slot" data-idx="3">&nbsp;</div>
+    </div>
+
+    <!-- keypad 0-9 (no OS keyboard) -->
+    <div class="pad" aria-label="数字のボタン">
+      <button class="key" data-num="1" aria-label="1">1</button>
+      <button class="key" data-num="2" aria-label="2">2</button>
+      <button class="key" data-num="3" aria-label="3">3</button>
+      <button class="key" data-num="4" aria-label="4">4</button>
+      <button class="key" data-num="5" aria-label="5">5</button>
+      <button class="key" data-num="6" aria-label="6">6</button>
+      <button class="key" data-num="7" aria-label="7">7</button>
+      <button class="key" data-num="8" aria-label="8">8</button>
+      <button class="key" data-num="9" aria-label="9">9</button>
+      <div></div>
+      <button class="key" data-num="0" aria-label="0">0</button>
+      <div></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn danger" id="clearBtn">クリア</button>
+      <button class="btn primary" id="enterBtn" disabled>けってい</button>
+    </div>
+
+    <!-- Results -->
+    <section class="result success" id="successPanel" role="status" aria-live="polite">
+      <h2>おめでとう！</h2>
+      <p>この画面を受付の人に見せてね 🎉</p>
+    </section>
+    <section class="result fail" id="failPanel" role="status" aria-live="polite">
+      <h2>ざんねん！もう一度チャレンジ！</h2>
+      <p><button class="btn" id="retryBtn">最初の画面にもどる</button></p>
+    </section>
+
+    <footer>
+      <span class="hint" id="hint"></span>
+    </footer>
+  </main>
+
+  <script>
+    // =============================
+    // 設定：答えの4ケタ
+    // 1) この定数を書き換える or
+    // 2) ページURLに ?code=1234 を付与して上書き可能 例）.../index.html?code=0423
+    // =============================
+    const DEFAULT_ANSWER = "0423";
+
+    // URLパラメータから code を読む
+    const params = new URLSearchParams(location.search);
+    const answerFromQuery = (params.get('code') || params.get('answer') || '').replace(/\D/g, '').slice(0,4);
+    const ANSWER = (answerFromQuery && answerFromQuery.length === 4) ? answerFromQuery : DEFAULT_ANSWER;
+
+    // （オプション）主催者だけ見えるヒント表示を有効化： ?showhint=1
+    const showHint = params.get('showhint') === '1';
+    if (showHint) { document.getElementById('hint').style.display = 'inline'; document.getElementById('hint').textContent = `※現在の答え: ${ANSWER}`; }
+
+    const display = document.getElementById('display');
+    const slots = Array.from(display.querySelectorAll('.slot'));
+    const clearBtn = document.getElementById('clearBtn');
+    const enterBtn = document.getElementById('enterBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const successPanel = document.getElementById('successPanel');
+    const failPanel = document.getElementById('failPanel');
+
+    let input = [];
+
+    function render(){
+      slots.forEach((el, i)=>{ el.textContent = input[i] ?? '\u00A0'; });
+      enterBtn.disabled = input.length !== 4;
+    }
+    function pushDigit(d){
+      if (input.length >= 4) return; // 4桁制限
+      input.push(d);
+      render();
+    }
+    function clearAll(){ input = []; render(); }
+
+    function check(){
+      if (input.length !== 4) return;
+      const code = input.join('');
+      if (code === ANSWER){
+        successPanel.classList.add('show');
+        failPanel.classList.remove('show');
+        // 視覚的な演出（簡易キラッ）
+        display.classList.remove('shake');
+        display.style.transition = 'box-shadow .25s ease';
+        display.style.boxShadow = '0 0 0 4px rgba(46, 204, 113, .35)';
+      } else {
+        // 失敗演出
+        successPanel.classList.remove('show');
+        failPanel.classList.add('show');
+        display.classList.add('shake');
+        setTimeout(()=>display.classList.remove('shake'), 400);
+        // 自動で入力を消す場合は次の行のコメントを外す
+        // clearAll();
+      }
+    }
+
+    // 0-9 ボタン
+    document.querySelectorAll('.key').forEach(btn =>{
+      btn.addEventListener('click', () => pushDigit(btn.dataset.num));
+    });
+
+    clearBtn.addEventListener('click', clearAll);
+    enterBtn.addEventListener('click', check);
+    retryBtn.addEventListener('click', () =>{
+      clearAll();
+      successPanel.classList.remove('show');
+      failPanel.classList.remove('show');
+      display.style.boxShadow = 'none';
+    });
+
+    // 物理キーボードの誤操作を防ぐ（スマホ中心想定）
+    window.addEventListener('keydown', (e)=>{
+      // 数字キーやEnter等は無効化
+      if (/^\d$/.test(e.key) || e.key === 'Enter' || e.key === 'Backspace'){
+        e.preventDefault();
+      }
+    }, { passive:false });
+
+    // 初期描画
+    render();
+  </script>
+</body>
+</html>

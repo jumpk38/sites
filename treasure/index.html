@@ -216,22 +216,30 @@
         document.getElementById('error-msg').innerText = ""; 
     }
 
-    function checkOrder() {
-        const quantity = document.getElementById('quantity').value;
+function checkOrder() {
+        const quantityInput = document.getElementById('quantity');
+        const quantity = quantityInput.value;
         const errorMsg = document.getElementById('error-msg');
         
+        // 商品選択のチェック
         if (selectedItemIndex === -1) {
-            errorMsg.innerText = "★ほしい商品を選んでね！";
+            errorMsg.innerText = "★ほしい商品をえらんでね！";
             return;
         }
+        // 商品が「はばたきパウダー入りソース」以外の場合
         if (selectedItemIndex !== 2) {
             errorMsg.innerText = "★商品がちがうようだ・・・";
+            // 商品間違いの場合は数値は残しておきます（商品だけ選び直せばいいため）
             return;
         }
+        // 数値（分量）のチェック
         if (quantity != 2005) {
             errorMsg.innerText = "★分量がちがうようだ・・・";
+            quantityInput.value = ''; // ← ここで入力値をクリア
+            quantityInput.focus();     // すぐに入力し直せるようフォーカスを当てる
             return;
         }
+        // すべて正解
         showSuccess();
     }
 

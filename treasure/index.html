@@ -3,138 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>はばたきストア - 特製ソース注文</title>
+    <title>はばたきストア注文画面</title>
     <style>
         :root {
-            --primary-color: #f39c12;
-            --bg-color: #fff9e6;
-            --btn-default: #ffffff;
-            --btn-active: #e67e22;
+            --primary-gold: #d4af37; /* アンティークゴールド */
+            --dark-wood: #5d4037;   /* 濃い茶色（木目） */
+            --light-wood: #8d6e63;  /* 明るい茶色 */
+            --parchment-bg: #f4e4c1; /* 羊皮紙の色 */
+            --text-color: #3e2723;   /* 焦げ茶色のテキスト */
         }
         body {
-            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif; /* セリフ体で古風に */
+            background-color: var(--parchment-bg);
+            /* 古い紙のようなテクスチャをCSSで表現 */
+            background-image: repeating-linear-gradient(to right, transparent 0 1px, rgba(0,0,0,0.05) 2px 4px),
+                              radial-gradient(circle at 50% 50%, #fff9e6, #e6d5ac);
             margin: 0;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: #333;
+            color: var(--text-color);
+            min-height: 100vh;
+            box-sizing: border-box;
         }
         .container {
             max-width: 400px;
             width: 100%;
-            background: white;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            /* 木製の看板のような装飾 */
+            background: linear-gradient(to bottom, var(--light-wood), var(--dark-wood));
+            padding: 25px;
+            border-radius: 15px;
+            /* 二重の枠線で額縁風に */
+            border: 5px solid var(--dark-wood);
+            box-shadow: 
+                inset 0 0 20px rgba(0,0,0,0.5), /* 内側の影で彫り込み感 */
+                0 10px 20px rgba(0,0,0,0.6),    /* 外側の重厚な影 */
+                0 0 0 5px var(--primary-gold);  /* 外側のゴールド枠 */
             text-align: center;
+            position: relative;
         }
-        h1 { font-size: 1.5rem; color: #d35400; margin-bottom: 10px; }
-        p { font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4; }
+        /* 四隅のビス留め装飾（擬似要素） */
+        .container::before, .container::after {
+            content: ''; position: absolute; width: 15px; height: 15px;
+            background: radial-gradient(circle, var(--primary-gold) 40%, #8c691c 100%);
+            border-radius: 50%; box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 2px 3px rgba(0,0,0,0.5);
+        }
+        .container::before { top: 10px; left: 10px; }
+        .container::after { top: 10px; right: 10px; }
 
-        /* アイテム選択ボタン */
+        h1 { 
+            font-size: 1.8rem; 
+            color: var(--primary-gold); 
+            margin-bottom: 15px; 
+            text-shadow: 2px 2px 4px #000;
+            border-bottom: 2px solid var(--primary-gold);
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+        p { font-size: 1rem; margin-bottom: 25px; line-height: 1.5; color: #f0e6d2; font-weight: bold; text-shadow: 1px 1px 2px #000; }
+
+        /* アイテム選択ボタン（木製プレート風） */
         .item-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 25px;
+            gap: 15px;
+            margin-bottom: 30px;
         }
         .item-btn {
-            background: var(--btn-default);
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            padding: 15px 10px;
-            font-size: 0.85rem;
+            /* 木製プレートの質感 */
+            background: linear-gradient(to bottom, #a67c52, #5d4037);
+            color: #f0e6d2;
+            border: 3px solid #3e2723;
+            border-radius: 8px;
+            padding: 15px 5px;
+            font-family: inherit;
+            font-size: 0.9rem;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 80px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            box-shadow: inset 0 2px 5px rgba(255,255,255,0.2), 0 4px 8px rgba(0,0,0,0.4);
+            min-height: 85px;
+            position: relative;
+            overflow: hidden;
         }
+        /* 選択時のハイライト（ゴールドに輝く） */
         .item-btn.active {
-            background: var(--btn-active);
-            color: white;
-            border-color: #d35400;
-            transform: scale(1.05);
+            background: linear-gradient(to bottom, #e6c15a, #c7a00a);
+            color: #3e2723;
+            border-color: #fff;
+            text-shadow: none;
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.6), 0 0 15px var(--primary-gold);
+            transform: scale(1.03);
         }
 
-        /* 数量入力 */
-        .input-group { margin-bottom: 25px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 1rem; }
+        /* 数量入力（古い巻物風） */
+        .input-group { 
+            margin-bottom: 30px; 
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        label { display: block; font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; color: var(--primary-gold); text-shadow: 1px 1px 2px #000; }
         input[type="number"] {
             width: 80%;
-            padding: 15px;
-            font-size: 1.5rem;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 1.8rem;
             text-align: center;
-            border: 2px solid #ddd;
-            border-radius: 10px;
+            background-color: var(--parchment-bg); /* 羊皮紙の色 */
+            border: 3px solid var(--dark-wood);
+            border-radius: 5px;
             outline: none;
+            color: var(--text-color);
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
         }
 
-        /* 注文ボタン */
+        /* 注文ボタン（重厚な金属風） */
         .order-btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
+            background: linear-gradient(to bottom, #557d58, #2e4b32);
+            color: #f0e6d2;
+            border: 3px solid #1b2e1e;
+            padding: 15px 30px;
+            font-family: inherit;
+            font-size: 1.3rem;
             font-weight: bold;
             border-radius: 50px;
-            box-shadow: 0 4px 0 #1e8449;
+            box-shadow: inset 0 2px 5px rgba(255,255,255,0.3), 0 6px 10px rgba(0,0,0,0.6);
             cursor: pointer;
             width: 100%;
+            text-shadow: 1px 1px 3px #000;
+            position: relative;
         }
-        .order-btn:active { transform: translateY(2px); box-shadow: none; }
+        .order-btn::after {
+             content: ''; position: absolute; top: 5px; left: 20%; width: 60%; height: 50%;
+             background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+             border-radius: 50px;
+        }
+        .order-btn:active { transform: translateY(3px); box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.4); }
 
-        /* 成功・失敗メッセージ */
+        /* メッセージ表示 */
+        .error-text { 
+            color: #ff7f7f; font-weight: bold; margin-top: 15px; height: 20px; font-size: 0.95rem; 
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        /* 成功時のオーバーレイ（宝物庫風） */
         #result-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(40, 20, 10, 0.95); /* 暗い茶色 */
+            background-image: radial-gradient(circle at center, rgba(100,70,40,0.8), rgba(40,20,10,0.98));
             z-index: 100;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: white;
+            color: var(--parchment-bg);
             padding: 20px;
             box-sizing: border-box;
+            border: 10px solid var(--dark-wood);
         }
-        .success-img { font-size: 100px; margin-bottom: 20px; animation: glow 1s ease-in-out infinite alternate; }
-        @keyframes glow { from { text-shadow: 0 0 10px #fff, 0 0 20px #f39c12; } to { text-shadow: 0 0 20px #fff, 0 0 30px #ffcc00; } }
-        .error-text { color: #ff6b6b; font-weight: bold; margin-top: 10px; height: 20px; font-size: 0.85rem; }
+        .success-img { font-size: 120px; margin-bottom: 20px; filter: drop-shadow(0 0 20px var(--primary-gold)); }
+        #result-overlay h2 { color: var(--primary-gold); font-size: 2rem; text-shadow: 2px 2px 5px #000; margin: 0; }
+        #result-overlay p { color: var(--parchment-bg); font-size: 1.2rem; text-shadow: 1px 1px 3px #000; margin-top: 20px; }
+        .back-btn {
+            margin-top: 40px; background: transparent; border: 2px solid var(--primary-gold); color: var(--primary-gold);
+            padding: 8px 20px; border-radius: 8px; font-family: inherit; font-weight: bold; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
 <div class="container" id="main-ui">
-    <h1>注文パネル</h1>
-    <p>料理長のメモをよく読んで、<br>ほしい商品と分量（g）を入れてね！</p>
+    <h1>はばたきストア</h1>
+    <p>料理長のメモをよく読んで<br>ほしい商品をえらんでね！</p>
 
     <div class="item-grid" id="item-grid">
         <button class="item-btn" onclick="selectItem(0, this)">照葉ガーリック<br>オイル</button>
-        <button class="item-btn" onclick="selectItem(1, this)">給食室の<br>まほうの塩</button>
+        <button class="item-btn" onclick="selectItem(1, this)">給食室の<br>まほうのしお</button>
         <button class="item-btn" onclick="selectItem(2, this)">はばたきパウダー<br>入りソース</button>
         <button class="item-btn" onclick="selectItem(3, this)">校長先生の<br>ひみつのサトウ</button>
     </div>
 
     <div class="input-group">
-        <label for="quantity">分量（グラム）をいれてね</label>
+        <label for="quantity">▼ 何グラムほしい？ ▼</label>
         <input type="number" id="quantity" placeholder="0000" inputmode="numeric">
         <div id="error-msg" class="error-text"></div>
     </div>
 
-    <button class="order-btn" onclick="checkOrder()">ちゅうもんを確定する</button>
+    <button class="order-btn" onclick="checkOrder()">注文する</button>
+    <div style="font-size: 0.75rem; color: #f0e6d2; margin-top: 12px; text-shadow: 1px 1px 2px #000; opacity: 0.8;">
+        何回でもチャレンジできるよ
+    </div>
 </div>
 
 <div id="result-overlay">
     <div class="success-img">🍯✨</div>
-    <h2 style="color: #f1c40f;">注文成功！</h2>
-    <p style="font-size: 1.1rem; text-align: center;">「黄金のはばたきソース」を手に入れた！<br><br>この画面を「配膳係（ゴール）」に見せてね！</p>
-    <button onclick="closeOverlay()" style="margin-top: 30px; background: none; border: 1px solid white; color: white; padding: 5px 15px; border-radius: 5px;">もどる</button>
+    <h2>おめでとう！</h2>
+    <p>「黄金のはばたきソース」を入手した！<br><br>この証を「ゴール受付」の人に見せてね！</p>
+    <button class="back-btn" onclick="closeOverlay()">もどる</button>
 </div>
 
 <script>
@@ -145,41 +213,43 @@
         const buttons = document.querySelectorAll('.item-btn');
         buttons.forEach(btn => btn.classList.remove('active'));
         element.classList.add('active');
-        document.getElementById('error-msg').innerText = ""; // メッセージクリア
+        document.getElementById('error-msg').innerText = ""; 
     }
 
     function checkOrder() {
         const quantity = document.getElementById('quantity').value;
         const errorMsg = document.getElementById('error-msg');
         
-        // バリデーション
         if (selectedItemIndex === -1) {
             errorMsg.innerText = "★ほしい商品を選んでね！";
             return;
         }
-
         if (selectedItemIndex !== 2) {
-            errorMsg.innerText = "★商品がちがうようだ（メモを読もう）";
+            errorMsg.innerText = "★商品がちがうようだ・・・";
             return;
         }
-
         if (quantity != 2005) {
-            errorMsg.innerText = "★分量がちがうようだ（ポスターを見よう）";
+            errorMsg.innerText = "★分量がちがうようだ・・・";
             return;
         }
-
-        // すべて正解
         showSuccess();
     }
 
     function showSuccess() {
         document.getElementById('result-overlay').style.display = 'flex';
-        // 演出としてバイブレーション（スマホのみ）
         if (navigator.vibrate) { navigator.vibrate([100, 50, 100]); }
     }
 
     function closeOverlay() {
         document.getElementById('result-overlay').style.display = 'none';
+    }
+    // URLパラメータ ?showhint=1 がある場合に答えを表示する機能（デバッグ用）
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('showhint') === '1') {
+        const hintDiv = document.createElement('div');
+        hintDiv.style.cssText = "position:fixed; bottom:5px; right:5px; font-size:10px; color:rgba(0,0,0,0.3); z-index:999;";
+        hintDiv.innerText = "Debug: Item[2] / Val[2005]";
+        document.body.appendChild(hintDiv);
     }
 </script>
 

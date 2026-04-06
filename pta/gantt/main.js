@@ -431,13 +431,13 @@ function renderGantt() {
   setTimeout(() => {
     const todayIndex = Math.floor((todayJST - minDate) / dayMs);
     if (todayIndex >= 0 && todayIndex < dayDiff) {
-      const wrapper = document.querySelector('.gantt-wrapper');
-      if (wrapper) {
+      const container = document.getElementById('gantt-container');
+      if (container) {
         // 左側の担当者列の幅ではなく、純粋に日付列の幅のみでスクロール位置を計算
         // （担当者列はposition: stickyで画面左端に追従するため）
         // 2日分（dayColWidth * 2）手前から見えるようにマージンを持たせる
         const scrollPos = Math.max(0, (todayIndex - 2) * 40);
-        wrapper.scrollLeft = scrollPos;
+        container.scrollLeft = scrollPos;
       }
     }
   }, 10);

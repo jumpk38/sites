@@ -34,9 +34,6 @@ header {
   background-color: var(--surface-color);
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  position: sticky;
-  top: 0;
-  z-index: 100;
 }
 
 header h1 {
@@ -174,9 +171,6 @@ main {
   background-color: var(--surface-color);
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
   position: relative;
   border: 1px solid var(--border-color);
 }
@@ -185,6 +179,9 @@ main {
   display: grid;
   position: relative;
   min-width: 100%;
+  overflow: auto; /* XY両方のスクロールを許可 */
+  max-height: 80vh; /* 高さ制限を設けて内部スクロールにする */
+  -webkit-overflow-scrolling: touch;
 }
 
 .gantt-header {
@@ -242,6 +239,7 @@ main {
 }
 
 .gantt-header-title {
+  top: 0;
   z-index: 30;
   background-color: var(--bg-color);
   align-items: center;

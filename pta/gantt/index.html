@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PTA ガントチャート</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+JP:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>PTA ガントチャート</h1>
+  </header>
+
+  <main>
+    <div class="card-panel">
+      <div class="card-content" style="flex-direction:row; justify-content:space-between; align-items:center; padding: 12px 16px;">
+        <span style="font-weight:600; color:var(--text-muted); font-size:0.875rem;">データ連携済み</span>
+        <button id="refresh-btn" class="primary-btn" style="margin-top:0; padding: 6px 12px; font-size:0.875rem;">更新</button>
+      </div>
+    </div>
+
+    <details class="accordion-panel" open>
+      <summary>絞り込みフィルター</summary>
+      <div class="accordion-content">
+        
+        <div class="filter-group">
+          <h3>期間で絞り込む</h3>
+          <div class="date-filter-row">
+            <input type="date" id="filter-start-date">
+            <span class="date-separator">〜</span>
+            <input type="date" id="filter-end-date">
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h3>役割で絞り込む</h3>
+          <div id="role-filter-container" class="filter-container">
+            <!-- JSでチェックボックスが生成されます -->
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h3>担当者で絞り込む</h3>
+          <div id="assignee-filter-container" class="filter-container">
+            <!-- JSでチェックボックスが生成されます -->
+          </div>
+        </div>
+
+      </div>
+    </details>
+
+    <div class="gantt-wrapper">
+      <div id="gantt-container" class="gantt-container">
+        <!-- JSでガントチャートが生成されます -->
+      </div>
+    </div>
+  </main>
+
+  <script src="main.js" charset="UTF-8"></script>
+</body>
+</html>

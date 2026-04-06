@@ -1,0 +1,280 @@
+:root {
+  --primary-color: #4A90E2;
+  --primary-hover: #357ABD;
+  --secondary-color: #E2E8F0;
+  --secondary-hover: #CBD5E1;
+  --bg-color: #F8FAFC;
+  --surface-color: #FFFFFF;
+  --text-color: #1E293B;
+  --text-muted: #64748B;
+  --border-color: #E2E8F0;
+  --gantt-grid-border: #F1F5F9;
+  --bar-color-1: #38BDF8;
+  --bar-color-2: #A78BFA;
+  --bar-color-3: #F472B6;
+  --bar-color-4: #34D399;
+  --bar-color-5: #FBBF24;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', 'Noto Sans JP', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+header {
+  background-color: var(--surface-color);
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+main {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media(min-width: 768px) {
+  main {
+    padding: 24px;
+  }
+}
+
+/* Settings Panel -> Card Panel (Refresh button box) */
+.card-panel {
+  background-color: var(--surface-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
+}
+
+/* Accordion Filter Panel */
+.accordion-panel {
+  background-color: var(--surface-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.accordion-panel summary {
+  padding: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-color);
+}
+.accordion-panel summary::-webkit-details-marker {
+  display: none;
+}
+.accordion-panel summary::after {
+  content: '▼';
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  transition: transform 0.3s;
+}
+.accordion-panel[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.date-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.date-filter-row input[type="date"] {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  font-family: inherit;
+  flex: 1;
+}
+.date-separator {
+  color: var(--text-muted);
+  font-weight: bold;
+}
+
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-chip input {
+  display: none;
+}
+
+.filter-chip span {
+  user-select: none;
+}
+
+.filter-chip:has(input:checked) {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* Gantt Chart Layout */
+.gantt-wrapper {
+  background-color: var(--surface-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  border: 1px solid var(--border-color);
+}
+
+.gantt-container {
+  display: grid;
+  position: relative;
+  min-width: 100%;
+}
+
+.gantt-header {
+  background-color: var(--bg-color);
+  border-bottom: 2px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+.gantt-cell {
+  padding: 8px 4px;
+  border-right: 1px solid var(--gantt-grid-border);
+  border-bottom: 1px solid var(--gantt-grid-border);
+  display: flex;
+  min-height: 56px;
+}
+
+.gantt-cell.weekend {
+  background-color: #F8FAFC;
+}
+
+.gantt-cell.today-highlight {
+  background-color: #FEF3C7;
+  color: #B45309;
+  font-weight: bold;
+}
+
+.gantt-grid-col-today {
+  background-color: #FFFBEB !important;
+  border-left: 2px solid #F59E0B !important;
+  border-right: 1px solid #F59E0B !important;
+  z-index: 1;
+}
+
+/* Fixed left column */
+.gantt-row-title, .gantt-header-title {
+  position: sticky;
+  left: 0;
+  background-color: var(--surface-color);
+  border-right: 2px solid var(--border-color);
+  z-index: 20;
+  justify-content: center;
+  align-items: flex-start;
+  flex-direction: column;
+  padding-left: 12px;
+  padding-right: 8px;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.04);
+}
+
+.gantt-header-title {
+  z-index: 30;
+  background-color: var(--bg-color);
+  align-items: center;
+  flex-direction: row;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Gantt bars container */
+.gantt-bar-container {
+  position: relative;
+}
+
+.gantt-bar {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 28px;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s;
+}
+
+.gantt-bar:hover {
+  transform: translateY(-2px);
+  z-index: 50;
+}

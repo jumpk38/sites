@@ -113,7 +113,7 @@
         }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col items-center justify-between py-6">
+<body class="h-[100dvh] w-screen flex flex-col items-center justify-between py-6">
 
     <!-- Start Screen (For Web Audio API init) -->
     <div id="start-screen" class="fixed inset-0 start-screen-bg z-50 flex flex-col items-center justify-center text-white transition-opacity duration-500">
@@ -127,7 +127,7 @@
     <!-- Header: Progress -->
     <div class="w-full max-w-2xl px-6 flex flex-col items-center gap-3">
         <div class="flex justify-between w-full items-end">
-            <h1 class="text-2xl font-bold text-green-700 tracking-wide">スイスイ漢字道場</h1>
+            <h1 class="text-2xl font-bold text-green-700 tracking-wide cursor-pointer hover:opacity-80 active:scale-95 transition-all" onclick="location.reload()" title="最初からやり直す">スイスイ漢字道場</h1>
             <p class="text-lg text-green-600 font-bold bg-green-100 px-4 py-1 rounded-full shadow-sm">
                 <span id="current-index" class="text-2xl">1</span> / <span id="total-kanji">10</span>
             </p>
@@ -414,10 +414,21 @@
                 drawingWidth: 28, // Apple Pencil向けに少し太め
                 drawingColor: '#1E3A8A', // Blue-900
                 charDataLoader: function(char, onLoad, onError) {
-                    fetch('https://cdn.jsdelivr.net/npm/hanzi-writer-data-jp@0/' + char + '.json')
-                        .then(res => res.json())
+                    fetch('https://cdn.jsdelivr.net/gh/mnako/hanzi-writer-data-ja@master/data/' + char + '.json')
+                        .then(res => {
+                            if (!res.ok) throw new Error();
+                            return res.json();
+                        })
                         .then(onLoad)
-                        .catch(onError);
+                        .catch(() => {
+                            fetch('https://cdn.jsdelivr.net/npm/hanzi-writer-data-jp@0/' + char + '.json')
+                                .then(res => {
+                                    if (!res.ok) throw new Error();
+                                    return res.json();
+                                })
+                                .then(onLoad)
+                                .catch(onError);
+                        });
                 }
             });
 

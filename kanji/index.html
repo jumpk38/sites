@@ -128,8 +128,8 @@
     </div>
 
     <!-- Main Card -->
-    <div class="card-container flex-1 flex items-center justify-center w-full my-4">
-        <div id="card" class="relative">
+    <div class="card-container flex-1 flex flex-col items-center justify-center w-full my-4">
+        <div id="card" class="relative flex flex-col items-center">
             <div id="character-target-div">
                 <div id="grade-label-badge" class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-yellow-900 font-bold px-5 py-1.5 rounded-full shadow-md z-20 text-sm whitespace-nowrap tracking-wide border-2 border-white transition-colors duration-300">
                     1年生で習う漢字
@@ -140,7 +140,20 @@
                 </svg>
                 <div id="hanzi-container"></div>
             </div>
-            <div id="particles-container" class="absolute top-0 left-0 w-full h-full pointer-events-none z-10"></div>
+            
+            <!-- Readings display -->
+            <div class="mt-5 w-[400px] bg-white rounded-2xl p-4 shadow-md border border-gray-100 flex flex-col gap-2 min-h-[5.5rem] relative z-20">
+                <div class="flex items-start gap-3">
+                    <span class="bg-blue-100 text-blue-700 text-sm font-bold px-3 py-1 rounded-lg shrink-0 w-12 text-center shadow-sm">音</span>
+                    <span id="on-readings" class="text-gray-700 font-bold text-lg leading-relaxed flex-1 tracking-wider"></span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="bg-orange-100 text-orange-800 text-sm font-bold px-3 py-1 rounded-lg shrink-0 w-12 text-center shadow-sm">訓</span>
+                    <span id="kun-readings" class="text-gray-700 font-bold text-lg leading-relaxed flex-1 tracking-wider"></span>
+                </div>
+            </div>
+
+            <div id="particles-container" class="absolute top-0 left-0 w-full h-[400px] pointer-events-none z-10"></div>
         </div>
     </div>
 
@@ -327,6 +340,26 @@
             document.getElementById('grade-label-badge').textContent = currentItem.grade;
             document.getElementById('current-index').textContent = currentIndex + 1;
             document.getElementById('total-kanji').textContent = SESSION_KANJI.length;
+            
+            // 音訓読みの取得と表示
+            const onReadingsEl = document.getElementById('on-readings');
+            const kunReadingsEl = document.getElementById('kun-readings');
+            onReadingsEl.textContent = '...';
+            kunReadingsEl.textContent = '...';
+            
+            fetch('https://kanjiapi.dev/v1/kanji/' + encodeURIComponent(char))
+                .then(res => res.json())
+                .then(data => {
+                    onReadingsEl.textContent = data.on_readings.length > 0 ? data.on_readings.join('、') : '（なし）';
+                    // 送り仮名のドット表現（例: ひと.しい）を取り除くなど整形
+                    const kun = data.kun_readings.map(r => r.replace('.', '')).join('、');
+                    kunReadingsEl.textContent = kun.length > 0 ? kun : '（なし）';
+                })
+                .catch(err => {
+                    console.error('Failed to fetch kanji readings', err);
+                    onReadingsEl.textContent = '取得できませんでした';
+                    kunReadingsEl.textContent = '取得できませんでした';
+                });
             
             // 進捗バーはクリアした数で計算
             document.getElementById('progress-bar').style.width = `${(clearedIndices.size / SESSION_KANJI.length) * 100}%`;

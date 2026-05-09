@@ -6,6 +6,7 @@
     <title>スイスイ漢字道場</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
@@ -20,7 +21,7 @@
         }
         
         .kanji-font {
-            font-family: 'Klee One', cursive;
+            font-family: 'UD Digi Kyokasho N-R', 'UD Digi Kyokasho', 'Yu Kyokasho', 'YuKyokasho', 'Klee One', cursive;
         }
 
         #character-target-div {
@@ -107,7 +108,7 @@
     <!-- Start Screen (For Web Audio API init) -->
     <div id="start-screen" class="fixed inset-0 start-screen-bg z-50 flex flex-col items-center justify-center text-white transition-opacity duration-500">
         <h1 class="text-5xl font-bold mb-4 drop-shadow-md tracking-wider">スイスイ漢字道場</h1>
-        <p class="text-xl mb-12 opacity-90">小学3年生 ・ リズムで覚える書き順</p>
+        <p class="text-xl mb-12 opacity-90">小学1〜3年生 ・ リズムで覚える書き順</p>
         <button id="btn-start" class="bg-white text-blue-600 font-bold py-5 px-16 rounded-full shadow-xl text-2xl hover:scale-105 active:scale-95 transition-transform">
             はじめる
         </button>
@@ -130,6 +131,9 @@
     <div class="card-container flex-1 flex items-center justify-center w-full my-4">
         <div id="card" class="relative">
             <div id="character-target-div">
+                <div id="grade-label-badge" class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-yellow-900 font-bold px-5 py-1.5 rounded-full shadow-md z-20 text-sm whitespace-nowrap tracking-wide border-2 border-white transition-colors duration-300">
+                    1年生で習う漢字
+                </div>
                 <svg class="grid-lines" id="grid-lines" xmlns="http://www.w3.org/2000/svg" width="400" height="400">
                     <line x1="200" y1="0" x2="200" y2="400" />
                     <line x1="0" y1="200" x2="400" y2="200" />
@@ -158,14 +162,29 @@
     </div>
 
     <script>
-        // Data & State (小学3年生の漢字サンプル 15文字)
-        const KANJI_LIST = ['等', '鼻', '整', '曜', '練', '悪', '安', '暗', '医', '委', '意', '育', '員', '院', '飲'];
+        // Data & State (小学1〜3年生の漢字)
+        const GRADE_1 = "一右雨円王音下火花貝学気九休玉金空月犬見五口校左三山子四糸字耳七車手十出女小上森人水正生青夕石赤千川先早草足村大男竹中虫町天田土二日入年白八百文木本名目立力林六".split('');
+        const GRADE_2 = "引羽雲園遠何科夏家歌画回会海絵外角楽活間丸岩顔汽記帰弓牛魚京強教近兄形計元言原戸古午後語工公広交光考行高黄合谷国黒今才細作算止市矢姉思紙寺自時室社弱首秋週春書少場色食心新親図数西声星晴切雪船線前組走多太体台地池知茶昼長鳥朝直通弟店点電刀冬当東答頭同道読内南肉馬売買麦半番父風分聞米歩母方北毎妹万明鳴毛門夜野友用曜来里理話".split('');
+        const GRADE_3 = "悪安暗医委意育員院飲運泳駅央横屋温化荷界開階寒感漢館岸起期客究急級宮球去橋業曲局銀区苦具君係軽血決研県庫湖向幸港号根祭皿仕死使始指歯詩次事持式実写者主守取酒受州拾終習集住重宿所暑助昭消商章勝乗植申身神真深進世整昔全相送想息速族他打対待代第題炭短談着注柱丁帳調追定庭笛鉄転都度投豆島湯登等動童農波配倍箱畑発反坂板皮悲美鼻筆氷表秒病品負部服福物平返勉放味命面問役薬由油有遊予羊洋葉陽様落流旅両緑礼列練路和".split('');
+
+        let allKanjiPool = [];
+        GRADE_1.forEach(char => allKanjiPool.push({ char, grade: '1年生で習う漢字' }));
+        GRADE_2.forEach(char => allKanjiPool.push({ char, grade: '2年生で習う漢字' }));
+        GRADE_3.forEach(char => allKanjiPool.push({ char, grade: '3年生で習う漢字' }));
+
+        // シャッフル
+        allKanjiPool.sort(() => 0.5 - Math.random());
+        // 15問選定
+        const SESSION_KANJI = allKanjiPool.slice(0, 15);
+
         let currentIndex = 0;
         let writer = null;
+        let clearedIndices = new Set();
+        let isGameCleared = false;
         
         // 連続正解数のトラッキング（十字ガイドを消すため）
         const kanjiStats = {}; 
-        KANJI_LIST.forEach(k => kanjiStats[k] = 0);
+        SESSION_KANJI.forEach(k => kanjiStats[k.char] = 0);
 
         // Web Audio API
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -258,8 +277,41 @@
             }
         }
 
+        function fireCrackers() {
+            const duration = 3000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0, y: 0.8 },
+                    colors: ['#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42', '#ffa62d', '#ff36ff']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1, y: 0.8 },
+                    colors: ['#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42', '#ffa62d', '#ff36ff']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+            
+            // クリアメッセージ表示
+            const clearMsg = document.createElement('div');
+            clearMsg.className = 'fixed inset-0 z-50 flex items-center justify-center pointer-events-none';
+            clearMsg.innerHTML = '<h1 class="text-6xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 drop-shadow-xl" style="animation: pop 0.8s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;">道場クリア！</h1>';
+            document.body.appendChild(clearMsg);
+        }
+
         function renderKanji(animateIn = true) {
-            const char = KANJI_LIST[currentIndex];
+            const currentItem = SESSION_KANJI[currentIndex];
+            const char = currentItem.char;
             const targetDiv = document.getElementById('character-target-div');
             const hanziContainer = document.getElementById('hanzi-container');
             
@@ -272,9 +324,22 @@
 
             // UI更新
             document.getElementById('current-kanji-display').textContent = char;
+            document.getElementById('grade-label-badge').textContent = currentItem.grade;
             document.getElementById('current-index').textContent = currentIndex + 1;
-            document.getElementById('total-kanji').textContent = KANJI_LIST.length;
-            document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / KANJI_LIST.length) * 100}%`;
+            document.getElementById('total-kanji').textContent = SESSION_KANJI.length;
+            
+            // 進捗バーはクリアした数で計算
+            document.getElementById('progress-bar').style.width = `${(clearedIndices.size / SESSION_KANJI.length) * 100}%`;
+
+            // クリア済み問題の場合はバッジの色を変える
+            if (clearedIndices.has(currentIndex)) {
+                document.getElementById('grade-label-badge').classList.replace('bg-yellow-400', 'bg-green-400');
+                document.getElementById('grade-label-badge').classList.replace('text-yellow-900', 'text-green-900');
+                document.getElementById('grade-label-badge').textContent += " (クリア済)";
+            } else {
+                document.getElementById('grade-label-badge').classList.replace('bg-green-400', 'bg-yellow-400');
+                document.getElementById('grade-label-badge').classList.replace('text-green-900', 'text-yellow-900');
+            }
 
             // ガイドライン（十字）の透明度
             const gridLines = document.getElementById('grid-lines');
@@ -290,7 +355,7 @@
                 width: 400,
                 height: 400,
                 padding: 20,
-                showOutline: true,
+                showOutline: true, // 青色のストロークと同一のSVGパスでアウトラインを描画する
                 strokeAnimationSpeed: 2,
                 delayBetweenStrokes: 50,
                 strokeColor: '#3B82F6', // Blue-500
@@ -298,6 +363,12 @@
                 outlineColor: '#E5E7EB', // Gray-200
                 drawingWidth: 28, // Apple Pencil向けに少し太め
                 drawingColor: '#1E3A8A', // Blue-900
+                charDataLoader: function(char, onLoad, onError) {
+                    fetch('https://cdn.jsdelivr.net/npm/hanzi-writer-data-jp@0/' + char + '.json')
+                        .then(res => res.json())
+                        .then(onLoad)
+                        .catch(onError);
+                }
             });
 
             writer.quiz({
@@ -322,15 +393,31 @@
                         kanjiStats[char]++;
                     }
 
-                    // 次の漢字へ自動遷移（少し待ってから）
+                    clearedIndices.add(currentIndex);
+                    document.getElementById('progress-bar').style.width = `${(clearedIndices.size / SESSION_KANJI.length) * 100}%`;
+
+                    // 次の漢字へ自動遷移、または全問クリア判定
                     setTimeout(() => {
-                        if (currentIndex < KANJI_LIST.length - 1) {
-                            currentIndex++;
-                            renderKanji();
-                        } else {
-                            alert("道場クリア！全問正解おめでとう！");
-                            currentIndex = 0;
-                            renderKanji();
+                        if (clearedIndices.size === SESSION_KANJI.length && !isGameCleared) {
+                            isGameCleared = true;
+                            fireCrackers();
+                        } else if (!isGameCleared) {
+                            // まだクリアしていない問題を探して遷移する
+                            if (clearedIndices.size < SESSION_KANJI.length) {
+                                let nextIndex = currentIndex + 1;
+                                while(nextIndex < SESSION_KANJI.length && clearedIndices.has(nextIndex)) {
+                                    nextIndex++;
+                                }
+                                if (nextIndex >= SESSION_KANJI.length) {
+                                    // 最後まで到達したら最初から探す
+                                    nextIndex = 0;
+                                    while(nextIndex < currentIndex && clearedIndices.has(nextIndex)) {
+                                        nextIndex++;
+                                    }
+                                }
+                                currentIndex = nextIndex;
+                                renderKanji();
+                            }
                         }
                     }, 1500);
                 }
@@ -359,7 +446,7 @@
         });
 
         document.getElementById('btn-next').addEventListener('click', () => {
-            if (currentIndex < KANJI_LIST.length - 1) {
+            if (currentIndex < SESSION_KANJI.length - 1) {
                 currentIndex++;
                 renderKanji(true);
             }

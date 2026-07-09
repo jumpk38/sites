@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#b7ede7">
+<title>🎧 おこづかいちょう ♪</title>
+<style>
+  :root {
+    --pink: #ffdbe9;
+    --pink-dark: #ff8fb8;
+    --mint: #b7ede7;
+    --mint-dark: #2fb3a8;
+    --yellow: #fff3c4;
+    --yellow-dark: #f0b400;
+    --blue: #e5dcff;
+    --blue-dark: #8f7ad9;
+    --red: #e85d75;
+    --text: #3d4a49;
+    --text-light: #8a9a98;
+    --bg: #eefaf7;
+    --card: #ffffff;
+    --radius: 22px;
+    --shadow: 0 2px 10px rgba(60, 150, 140, .16);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Hiragino Maru Gothic ProN", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Ccircle cx='24' cy='26' r='4' fill='%232fb3a8' opacity='.07'/%3E%3Ccircle cx='96' cy='64' r='5' fill='%23ff8fb8' opacity='.07'/%3E%3Ccircle cx='48' cy='116' r='4' fill='%238f7ad9' opacity='.07'/%3E%3Ccircle cx='124' cy='120' r='3' fill='%23f0b400' opacity='.09'/%3E%3C/svg%3E");
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    max-width: 768px;
+    margin: 0 auto;
+    overscroll-behavior: none;
+  }
+  button { font-family: inherit; color: inherit; border: none; background: none; cursor: pointer; }
+
+  /* ---- ヘッダー ---- */
+  header {
+    background: linear-gradient(120deg, var(--mint), var(--blue));
+    padding: calc(env(safe-area-inset-top) + 12px) 16px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+  }
+  header h1 { font-size: 20px; }
+  #btn-parent {
+    font-size: 12px;
+    color: var(--text-light);
+    background: rgba(255,255,255,.6);
+    padding: 8px 12px;
+    border-radius: 14px;
+  }
+
+  /* ---- メイン ---- */
+  main { flex: 1; overflow-y: auto; padding: 16px 16px 8px; -webkit-overflow-scrolling: touch; }
+  .tab { display: none; }
+  .tab.active { display: block; animation: fadein .18s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; } }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .card h2 { font-size: 15px; color: var(--text-light); margin-bottom: 8px; }
+
+  /* ---- マスコット ---- */
+  .mascot-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .mascot {
+    width: 108px;
+    flex-shrink: 0;
+    animation: bounce 3s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+  .mascot .note-float { animation: notefloat 2.6s ease-in-out infinite; }
+  .mascot .note-float2 { animation: notefloat 2.6s ease-in-out .9s infinite; }
+  @keyframes notefloat {
+    0%, 100% { opacity: .3; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-4px); }
+  }
+  .bubble {
+    position: relative;
+    flex: 1;
+    background: var(--card);
+    border: 2px solid var(--mint);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 12px 14px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .bubble::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    margin-top: -7px;
+    border: 7px solid transparent;
+    border-right-color: var(--mint);
+  }
+  .corner-buddy {
+    position: absolute;
+    width: 44px;
+    right: 10px;
+    bottom: 6px;
+    pointer-events: none;
+  }
+
+  /* ---- ホーム ---- */
+  #interest-banner {
+    display: none;
+    background: var(--yellow);
+    border: 2px dashed var(--yellow-dark);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+  }
+  #backup-banner {
+    display: none;
+    background: var(--blue);
+    border: 2px dashed var(--blue-dark);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.6;
+    cursor: pointer;
+  }
+  .balance-row { display: flex; gap: 12px; margin-bottom: 14px; }
+  .balance-box {
+    flex: 1;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 12px;
+    text-align: center;
+  }
+  .balance-box .label { font-size: 14px; margin-bottom: 6px; }
+  .balance-box .amount { font-size: 24px; font-weight: bold; word-break: break-all; }
+  #box-wallet { background: var(--pink); }
+  #box-bank { background: var(--mint); }
+  .total-box {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .total-box .amount { font-size: 30px; font-weight: bold; }
+  .mini-summary { display: flex; justify-content: space-around; font-size: 15px; }
+  .mini-summary .in { color: var(--mint-dark); font-weight: bold; }
+  .mini-summary .out { color: var(--red); font-weight: bold; }
+
+  /* ---- きろく ---- */
+  .type-toggle { display: flex; gap: 10px; margin-bottom: 14px; }
+  .type-toggle button {
+    flex: 1;
+    padding: 14px;
+    border-radius: var(--radius);
+    font-size: 17px;
+    font-weight: bold;
+    background: #eee;
+    color: var(--text-light);
+    transition: all .15s;
+  }
+  .type-toggle button.sel-in { background: var(--mint); color: var(--text); box-shadow: var(--shadow); }
+  .type-toggle button.sel-out { background: var(--pink); color: var(--text); box-shadow: var(--shadow); }
+
+  .amount-display {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    font-size: 34px;
+    font-weight: bold;
+    text-align: right;
+    padding: 14px 20px;
+    margin-bottom: 12px;
+    min-height: 66px;
+  }
+  .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+  .numpad button {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    font-size: 24px;
+    font-weight: bold;
+    padding: 14px 0;
+    min-height: 54px;
+  }
+  .numpad button:active { transform: scale(.95); background: var(--yellow); }
+  .numpad .np-del { font-size: 20px; color: var(--red); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chips button {
+    padding: 12px 16px;
+    border-radius: 999px;
+    background: var(--card);
+    box-shadow: var(--shadow);
+    font-size: 15px;
+  }
+  .chips button.sel { background: var(--yellow); border: 2px solid var(--yellow-dark); font-weight: bold; }
+
+  input[type="text"], input[type="tel"], input[type="number"], textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: 16px;
+    padding: 12px 14px;
+    border: 2px solid #eee;
+    border-radius: 14px;
+    background: var(--card);
+    color: var(--text);
+    outline: none;
+  }
+  input:focus, textarea:focus { border-color: var(--mint-dark); }
+
+  .btn-big {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    border-radius: var(--radius);
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: var(--shadow);
+    margin-top: 14px;
+  }
+  .btn-big:active { transform: scale(.98); }
+  .btn-primary { background: var(--mint-dark); color: #fff; }
+  .btn-mint { background: var(--mint-dark); color: #fff; }
+  .btn-gray { background: #eee; color: var(--text-light); }
+  .btn-danger { background: var(--red); color: #fff; }
+
+  /* ---- ぎんこう ---- */
+  .bank-hero {
+    position: relative;
+    background: linear-gradient(135deg, var(--mint), var(--blue));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px 18px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .bank-hero .label { font-size: 15px; }
+  .bank-hero .amount { font-size: 34px; font-weight: bold; margin: 6px 0; }
+  .bank-hero .rate { font-size: 14px; color: var(--text); background: rgba(255,255,255,.7); display: inline-block; padding: 4px 14px; border-radius: 999px; }
+  .bank-btns { display: flex; gap: 12px; margin-bottom: 14px; }
+  .bank-btns button {
+    flex: 1;
+    padding: 18px 10px;
+    border-radius: var(--radius);
+    font-size: 17px;
+    font-weight: bold;
+    box-shadow: var(--shadow);
+  }
+  .bank-btns .deposit { background: var(--mint); }
+  .bank-btns .withdraw { background: var(--pink); }
+  .forecast-table { width: 100%; font-size: 16px; border-collapse: collapse; }
+  .forecast-table td { padding: 8px 4px; border-bottom: 1px dashed #eee; }
+  .forecast-table td:last-child { text-align: right; font-weight: bold; }
+  .forecast-plus { color: var(--mint-dark); font-size: 13px; font-weight: normal; }
+
+  /* ---- りれき ---- */
+  .filter-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .filter-row button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 999px;
+    background: var(--card);
+    box-shadow: var(--shadow);
+    font-size: 14px;
+  }
+  .filter-row button.sel { background: var(--yellow); border: 2px solid var(--yellow-dark); font-weight: bold; }
+  .month-head { font-size: 14px; font-weight: bold; color: var(--text-light); margin: 16px 4px 8px; }
+  .hist-item {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hist-item .icon { font-size: 22px; }
+  .hist-item .body { flex: 1; min-width: 0; }
+  .hist-item .title { font-size: 15px; font-weight: bold; }
+  .hist-item .sub { font-size: 12px; color: var(--text-light); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hist-item .amt { font-size: 16px; font-weight: bold; white-space: nowrap; }
+  .amt.plus { color: var(--mint-dark); }
+  .amt.minus { color: var(--red); }
+  .empty-msg { text-align: center; color: var(--text-light); padding: 40px 0; font-size: 15px; }
+
+  /* ---- 保護者 ---- */
+  #tab-parent h2.page-title { font-size: 18px; margin-bottom: 14px; }
+  .parent-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 15px; border-bottom: 1px dashed #eee; }
+  .parent-row:last-child { border-bottom: none; }
+  .rate-input-row { display: flex; gap: 10px; align-items: center; }
+  .rate-input-row input { flex: 1; }
+  .rate-input-row .unit { font-size: 16px; }
+  .pin-dots { display: flex; justify-content: center; gap: 14px; margin: 18px 0; }
+  .pin-dots span { width: 18px; height: 18px; border-radius: 50%; background: #eee; }
+  .pin-dots span.on { background: var(--mint-dark); }
+  #parent-lock .numpad { max-width: 320px; margin: 0 auto 14px; }
+  .note { font-size: 12px; color: var(--text-light); margin-top: 8px; line-height: 1.6; }
+
+  /* ---- ナビ ---- */
+  nav {
+    flex-shrink: 0;
+    display: flex;
+    background: var(--card);
+    border-radius: var(--radius) var(--radius) 0 0;
+    box-shadow: 0 -2px 10px rgba(180,140,160,.15);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  nav button {
+    flex: 1;
+    padding: 10px 0 8px;
+    font-size: 11px;
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  nav button .nav-icon { font-size: 24px; }
+  nav button.sel { color: var(--mint-dark); font-weight: bold; }
+
+  /* ---- モーダル ---- */
+  .modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(74, 63, 69, .45);
+    z-index: 50;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--bg);
+    border-radius: var(--radius) var(--radius) 0 0;
+    width: 100%;
+    max-width: 768px;
+    padding: 20px 16px calc(env(safe-area-inset-bottom) + 20px);
+    animation: slideup .2s ease;
+  }
+  @keyframes slideup { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .modal h3 { font-size: 17px; text-align: center; margin-bottom: 12px; }
+  .modal .limit-note { text-align: center; font-size: 13px; color: var(--text-light); margin-bottom: 10px; }
+
+  /* ---- トースト ---- */
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 110px;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: bold;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .25s;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎧 おこづかいちょう ♪</h1>
+  <button id="btn-parent" onclick="openParent()">👤 保護者</button>
+</header>
+
+<main>
+  <!-- ホーム -->
+  <section class="tab active" id="tab-home">
+    <div class="mascot-row">
+      <svg class="mascot" viewBox="0 0 140 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <text class="note-float" x="114" y="28" font-size="17" fill="#2fb3a8">♪</text>
+        <text class="note-float2" x="12" y="44" font-size="13" fill="#8f7ad9">♫</text>
+        <!-- 耳 -->
+        <ellipse cx="44" cy="32" rx="10" ry="15" fill="#fffdf6" stroke="#4a4a4a" stroke-width="2.5" transform="rotate(-14 44 32)"/>
+        <ellipse cx="96" cy="32" rx="10" ry="15" fill="#fffdf6" stroke="#4a4a4a" stroke-width="2.5" transform="rotate(14 96 32)"/>
+        <ellipse cx="44" cy="35" rx="4.5" ry="8" fill="#ffdbe9" transform="rotate(-14 44 35)"/>
+        <ellipse cx="96" cy="35" rx="4.5" ry="8" fill="#ffdbe9" transform="rotate(14 96 35)"/>
+        <!-- からだ -->
+        <ellipse cx="70" cy="74" rx="44" ry="40" fill="#fffdf6" stroke="#4a4a4a" stroke-width="2.5"/>
+        <!-- ヘッドホン -->
+        <path d="M30 60 Q70 20 110 60" fill="none" stroke="#2fb3a8" stroke-width="6" stroke-linecap="round"/>
+        <ellipse cx="29" cy="69" rx="9" ry="12" fill="#39c5bb" stroke="#238f86" stroke-width="2"/>
+        <ellipse cx="111" cy="69" rx="9" ry="12" fill="#39c5bb" stroke="#238f86" stroke-width="2"/>
+        <!-- かお -->
+        <circle cx="56" cy="72" r="3.4" fill="#4a4a4a"/>
+        <circle cx="84" cy="72" r="3.4" fill="#4a4a4a"/>
+        <path d="M64 81 Q67 85 70 81 Q73 85 76 81" fill="none" stroke="#4a4a4a" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="45" cy="82" r="5.5" fill="#ffc0d4" opacity=".85"/>
+        <circle cx="95" cy="82" r="5.5" fill="#ffc0d4" opacity=".85"/>
+        <!-- あし -->
+        <ellipse cx="54" cy="112" rx="8" ry="5" fill="#fffdf6" stroke="#4a4a4a" stroke-width="2.5"/>
+        <ellipse cx="86" cy="112" rx="8" ry="5" fill="#fffdf6" stroke="#4a4a4a" stroke-width="2.5"/>
+      </svg>
+      <div class="bubble" id="mascot-bubble"></div>
+    </div>
+    <div id="interest-banner"></div>
+    <div id="backup-banner" onclick="openParent()"></div>
+    <div class="total-box">
+      <h2>ぜんぶで</h2>
+      <div class="amount" id="home-total">0円</div>
+    </div>
+    <div class="balance-row">
+      <div class="balance-box" id="box-wallet">
+        <div class="label">👛 おさいふ</div>
+        <div class="amount" id="home-wallet">0円</div>
+      </div>
+      <div class="balance-box" id="box-bank">
+        <div class="label">🏦 ぎんこう</div>
+        <div class="amount" id="home-bank">0円</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 id="home-month-label">今月</h2>
+      <div class="mini-summary">
+        <div>もらった <span class="in" id="home-month-in">0円</span></div>
+        <div>つかった <span class="out" id="home-month-out">0円</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- きろく -->
+  <section class="tab" id="tab-record">
+    <div class="type-toggle">
+      <button id="rec-btn-in" onclick="setRecType('in')">💰 もらった</button>
+      <button id="rec-btn-out" onclick="setRecType('out')">🛍️ つかった</button>
+    </div>
+    <div class="amount-display" id="rec-amount">0円</div>
+    <div class="numpad" id="rec-numpad"></div>
+    <div class="card">
+      <h2>なにかな?</h2>
+      <div class="chips" id="rec-chips"></div>
+      <input type="text" id="rec-memo" placeholder="メモ(かかなくてもOK)" maxlength="30">
+    </div>
+    <button class="btn-big btn-primary" onclick="saveRecord()">きろくする ✏️</button>
+  </section>
+
+  <!-- ぎんこう -->
+  <section class="tab" id="tab-bank">
+    <div class="bank-hero">
+      <div class="label">🏦 ぎんこうに あずけているお金</div>
+      <div class="amount" id="bank-balance">0円</div>
+      <div class="rate">年利 <span id="bank-rate">10</span>%(1年でふえる わりあい)</div>
+      <svg class="corner-buddy" viewBox="0 0 60 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- すみっこにすわる ちいさな おともだち(ことりのこ) -->
+        <ellipse cx="30" cy="32" rx="17" ry="15" fill="#fff8dc" stroke="#4a4a4a" stroke-width="2"/>
+        <path d="M22 20 Q26 12 32 18" fill="none" stroke="#4a4a4a" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="24" cy="30" r="2.2" fill="#4a4a4a"/>
+        <circle cx="36" cy="30" r="2.2" fill="#4a4a4a"/>
+        <path d="M28 34 L31 36 L28 38" fill="#f0b400" stroke="#4a4a4a" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="19" cy="36" r="3" fill="#ffc0d4" opacity=".85"/>
+        <circle cx="41" cy="36" r="3" fill="#ffc0d4" opacity=".85"/>
+        <ellipse cx="24" cy="47" rx="5" ry="3" fill="#fff8dc" stroke="#4a4a4a" stroke-width="2"/>
+        <ellipse cx="36" cy="47" rx="5" ry="3" fill="#fff8dc" stroke="#4a4a4a" stroke-width="2"/>
+      </svg>
+    </div>
+    <div class="bank-btns">
+      <button class="deposit" onclick="openBankModal('deposit')">⬇️ あずける</button>
+      <button class="withdraw" onclick="openBankModal('withdraw')">⬆️ ひきだす</button>
+    </div>
+    <div class="card">
+      <h2>🔮 このまま あずけておくと…</h2>
+      <table class="forecast-table" id="forecast-table"></table>
+      <div class="note">毎月、りそくがついて どんどんふえるよ(ふくり)</div>
+    </div>
+  </section>
+
+  <!-- りれき -->
+  <section class="tab" id="tab-history">
+    <div class="filter-row">
+      <button data-f="all" class="sel" onclick="setHistFilter('all')">ぜんぶ</button>
+      <button data-f="wallet" onclick="setHistFilter('wallet')">👛 おさいふ</button>
+      <button data-f="bank" onclick="setHistFilter('bank')">🏦 ぎんこう</button>
+    </div>
+    <div id="hist-list"></div>
+  </section>
+
+  <!-- 保護者 -->
+  <section class="tab" id="tab-parent">
+    <!-- 暗証番号ロック -->
+    <div id="parent-lock">
+      <h2 class="page-title" id="pin-title">暗証番号を入力</h2>
+      <div class="pin-dots" id="pin-dots"><span></span><span></span><span></span><span></span></div>
+      <div class="numpad" id="pin-numpad"></div>
+      <button class="btn-big btn-gray" onclick="goTab('home')">もどる</button>
+    </div>
+    <!-- 保護者コンテンツ -->
+    <div id="parent-content" style="display:none">
+      <h2 class="page-title">👤 保護者ページ</h2>
+      <div class="card">
+        <h2>残高サマリー</h2>
+        <div class="parent-row"><span>おさいふ</span><span id="p-wallet"></span></div>
+        <div class="parent-row"><span>銀行(疑似口座)</span><span id="p-bank"></span></div>
+        <div class="parent-row"><span>合計</span><span id="p-total"></span></div>
+        <div class="parent-row"><span>これまでの利息合計</span><span id="p-interest"></span></div>
+        <div class="parent-row"><span>利息の最終計算月</span><span id="p-last-ym"></span></div>
+      </div>
+      <div class="card">
+        <h2>年利の設定(%)</h2>
+        <div class="rate-input-row">
+          <input type="number" id="p-rate-input" min="0" max="100" step="0.1" inputmode="decimal">
+          <span class="unit">%</span>
+          <button class="btn-big btn-mint" style="width:auto; margin:0; padding:12px 18px;" onclick="saveRate()">保存</button>
+        </div>
+        <div class="note">利息は月複利(年利÷12を毎月適用、1円未満切り捨て)。アプリを開いたときに、前回計算から経過した月数分をまとめて加算します。変更は次回の計算分から反映されます。</div>
+      </div>
+      <div class="card">
+        <h2>バックアップ</h2>
+        <div class="parent-row"><span>最終バックアップ</span><span id="p-last-backup"></span></div>
+        <button class="btn-big btn-mint" onclick="exportJson()">バックアップを保存(JSONファイル)</button>
+        <button class="btn-big btn-gray" onclick="exportCsv()">CSVで保存(表計算ソフト用)</button>
+        <button class="btn-big btn-gray" onclick="document.getElementById('restore-file').click()">ファイルから復元</button>
+        <input type="file" id="restore-file" accept=".json,application/json" style="display:none" onchange="restoreFromFile(this)">
+        <div class="note">
+          ・JSONファイルが完全なバックアップです。iPadでは「ファイル」アプリ(iCloud Drive)に保存されます。<br>
+          ・CSVは閲覧用で、復元には使えません。<br>
+          ・ブラウザの履歴削除でデータが消えることがあるため、定期的なバックアップと「ホーム画面に追加」してのご利用をおすすめします。30日以上バックアップがないと、ホーム画面にお知らせが出ます。
+        </div>
+      </div>
+      <div class="card">
+        <h2>データ管理</h2>
+        <button class="btn-big btn-danger" onclick="resetData()">全データをリセット</button>
+      </div>
+      <div class="card">
+        <h2>暗証番号の変更</h2>
+        <input type="tel" id="p-new-pin" maxlength="4" placeholder="新しい4けたの番号" inputmode="numeric">
+        <button class="btn-big btn-gray" onclick="changePin()">変更する</button>
+      </div>
+      <button class="btn-big btn-primary" onclick="goTab('home')">ホームにもどる</button>
+    </div>
+  </section>
+</main>
+
+<nav>
+  <button data-tab="home" class="sel" onclick="goTab('home')"><span class="nav-icon">🏠</span>ホーム</button>
+  <button data-tab="record" onclick="goTab('record')"><span class="nav-icon">✏️</span>きろく</button>
+  <button data-tab="bank" onclick="goTab('bank')"><span class="nav-icon">🏦</span>ぎんこう</button>
+  <button data-tab="history" onclick="goTab('history')"><span class="nav-icon">📖</span>りれき</button>
+</nav>
+
+<!-- 銀行 入出金モーダル -->
+<div class="modal-bg" id="bank-modal-bg" onclick="if(event.target===this) closeBankModal()">
+  <div class="modal">
+    <h3 id="bank-modal-title"></h3>
+    <div class="limit-note" id="bank-modal-limit"></div>
+    <div class="amount-display" id="bank-modal-amount">0円</div>
+    <div class="numpad" id="bank-numpad"></div>
+    <button class="btn-big btn-mint" id="bank-modal-ok" onclick="confirmBankModal()"></button>
+    <button class="btn-big btn-gray" onclick="closeBankModal()">やめる</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+/* ================= データ ================= */
+const KEY = 'okozukai-app-v1';
+const CATEGORIES = {
+  in:  ['おこづかい', 'おてつだい', 'お年玉', 'プレゼント', 'その他'],
+  out: ['おかし', 'おもちゃ', '文ぼう具', '本', 'その他'],
+};
+const TRANSFER_CAT = 'ぎんこう';
+
+let state = null;
+
+function defaultState() {
+  return {
+    version: 1,
+    wallet: { transactions: [] },
+    bank: { balance: 0, annualRate: 10, lastInterestYm: ymNow(), history: [] },
+    settings: { parentPin: null, lastBackupAt: null },
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) { state = defaultState(); return; }
+    const d = JSON.parse(raw);
+    const def = defaultState();
+    state = {
+      version: 1,
+      wallet: { transactions: Array.isArray(d.wallet?.transactions) ? d.wallet.transactions : [] },
+      bank: { ...def.bank, ...(d.bank || {}) },
+      settings: { ...def.settings, ...(d.settings || {}) },
+    };
+    if (!Array.isArray(state.bank.history)) state.bank.history = [];
+  } catch (e) {
+    state = defaultState();
+  }
+}
+
+function saveState() {
+  localStorage.setItem(KEY, JSON.stringify(state));
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function ymNow() { return todayStr().slice(0, 7); }
+function yen(n) { return n.toLocaleString('ja-JP') + '円'; }
+
+function walletBalance() {
+  return state.wallet.transactions.reduce((s, t) => s + (t.type === 'in' ? t.amount : -t.amount), 0);
+}
+
+/* ================= 利息計算(月複利) ================= */
+function monthsBetween(ymA, ymB) {
+  const [y1, m1] = ymA.split('-').map(Number);
+  const [y2, m2] = ymB.split('-').map(Number);
+  return (y2 - y1) * 12 + (m2 - m1);
+}
+function addMonths(ym, n) {
+  const [y, m] = ym.split('-').map(Number);
+  const total = y * 12 + (m - 1) + n;
+  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`;
+}
+
+// アプリ起動時に呼ぶ。加算した利息の合計を返す。
+function applyInterest() {
+  const now = ymNow();
+  const elapsed = monthsBetween(state.bank.lastInterestYm, now);
+  if (elapsed <= 0) {
+    // 時計が過去に戻っている場合も lastInterestYm は動かさない
+    return 0;
+  }
+  let total = 0;
+  for (let i = 1; i <= elapsed; i++) {
+    const interest = Math.floor(state.bank.balance * state.bank.annualRate / 100 / 12);
+    if (interest > 0) {
+      state.bank.balance += interest;
+      total += interest;
+      state.bank.history.push({
+        id: uid(),
+        date: addMonths(state.bank.lastInterestYm, i) + '-01',
+        type: 'interest',
+        amount: interest,
+        balanceAfter: state.bank.balance,
+      });
+    }
+  }
+  state.bank.lastInterestYm = now;
+  saveState();
+  return total;
+}
+
+/* ================= タブ ================= */
+function goTab(name) {
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('sel', b.dataset.tab === name));
+  document.querySelector('main').scrollTop = 0;
+  if (name === 'home') renderHome();
+  if (name === 'bank') renderBank();
+  if (name === 'history') renderHistory();
+}
+
+/* ================= トースト ================= */
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* ================= 汎用テンキー ================= */
+// getter/setter で金額(数値)を扱う。上限 9,999,999。
+function buildNumpad(container, getVal, setVal) {
+  container.innerHTML = '';
+  const keys = ['1','2','3','4','5','6','7','8','9','00','0','del'];
+  keys.forEach(k => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    if (k === 'del') {
+      b.textContent = '⌫ けす';
+      b.className = 'np-del';
+      b.onclick = () => setVal(Math.floor(getVal() / 10));
+    } else {
+      b.textContent = k;
+      b.onclick = () => {
+        const next = Number(String(getVal()) + k);
+        if (next <= 9999999) setVal(next);
+      };
+    }
+    container.appendChild(b);
+  });
+}
+
+/* ================= ホーム ================= */
+const BACKUP_REMIND_DAYS = 30;
+function needsBackupReminder() {
+  if (state.wallet.transactions.length === 0 && state.bank.history.length === 0) return false;
+  if (!state.settings.lastBackupAt) return true;
+  const elapsed = Date.now() - new Date(state.settings.lastBackupAt).getTime();
+  return elapsed > BACKUP_REMIND_DAYS * 24 * 60 * 60 * 1000;
+}
+
+function renderBackupBanner() {
+  const el = document.getElementById('backup-banner');
+  if (!needsBackupReminder()) { el.style.display = 'none'; return; }
+  el.innerHTML = state.settings.lastBackupAt
+    ? '👤 <b>保護者の方へ</b>: 最終バックアップから30日以上たっています。<br>タップしてバックアップしてください'
+    : '👤 <b>保護者の方へ</b>: まだバックアップがありません。<br>タップしてバックアップしてください';
+  el.style.display = 'block';
+}
+
+function renderHome() {
+  renderBackupBanner();
+  const w = walletBalance();
+  const b = state.bank.balance;
+  document.getElementById('home-wallet').textContent = yen(w);
+  document.getElementById('home-bank').textContent = yen(b);
+  document.getElementById('home-total').textContent = yen(w + b);
+
+  const ym = ymNow();
+  const [, m] = ym.split('-');
+  document.getElementById('home-month-label').textContent = `${Number(m)}月の おさいふ`;
+  let mIn = 0, mOut = 0;
+  state.wallet.transactions.forEach(t => {
+    if (!t.date.startsWith(ym) || t.category === TRANSFER_CAT) return;
+    if (t.type === 'in') mIn += t.amount; else mOut += t.amount;
+  });
+  document.getElementById('home-month-in').textContent = yen(mIn);
+  document.getElementById('home-month-out').textContent = yen(mOut);
+}
+
+const BUBBLE_PHRASES = [
+  'こんにちは!♪ きょうも きろく してみよう',
+  'ためると りそくで ふえるよ〜♪',
+  'おかいものの まえに ざんだか チェック!',
+  'ちょっとずつ ためてて えらい…! えらすぎる…!',
+  'ぎんこうに あずけると ふえていくよ♪',
+];
+function setMascotBubble(gotInterest) {
+  document.getElementById('mascot-bubble').textContent = gotInterest
+    ? 'りそくが ついたよ!! やった〜〜♪'
+    : BUBBLE_PHRASES[Math.floor(Math.random() * BUBBLE_PHRASES.length)];
+}
+
+function showInterestBanner(total, months) {
+  const el = document.getElementById('interest-banner');
+  el.innerHTML = `🎉 りそくが <span style="font-size:22px">${yen(total)}</span> つきました!<br><span style="font-size:13px; font-weight:normal">(${months}か月ぶん)</span>`;
+  el.style.display = 'block';
+}
+
+/* ================= きろく ================= */
+let recType = 'in';
+let recAmount = 0;
+let recCategory = null;
+
+function setRecType(type) {
+  recType = type;
+  recCategory = null;
+  document.getElementById('rec-btn-in').className = type === 'in' ? 'sel-in' : '';
+  document.getElementById('rec-btn-out').className = type === 'out' ? 'sel-out' : '';
+  const chips = document.getElementById('rec-chips');
+  chips.innerHTML = '';
+  CATEGORIES[type].forEach(c => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = c;
+    b.onclick = () => {
+      recCategory = c;
+      chips.querySelectorAll('button').forEach(x => x.classList.toggle('sel', x === b));
+    };
+    chips.appendChild(b);
+  });
+}
+
+function renderRecAmount() {
+  document.getElementById('rec-amount').textContent = yen(recAmount);
+}
+
+function saveRecord() {
+  if (recAmount <= 0) { toast('金がくを 入れてね'); return; }
+  if (!recCategory) { toast('なにかな? をえらんでね'); return; }
+  if (recType === 'out' && recAmount > walletBalance()) {
+    toast('おさいふのお金より 多いよ💦');
+    return;
+  }
+  state.wallet.transactions.push({
+    id: uid(),
+    date: todayStr(),
+    type: recType,
+    amount: recAmount,
+    category: recCategory,
+    memo: document.getElementById('rec-memo').value.trim(),
+  });
+  saveState();
+  toast(recType === 'in' ? 'きろくしたよ!💰' : 'きろくしたよ!✏️');
+  recAmount = 0;
+  recCategory = null;
+  document.getElementById('rec-memo').value = '';
+  renderRecAmount();
+  setRecType(recType);
+  goTab('home');
+}
+
+/* ================= ぎんこう ================= */
+function renderBank() {
+  document.getElementById('bank-balance').textContent = yen(state.bank.balance);
+  document.getElementById('bank-rate').textContent = state.bank.annualRate;
+
+  // 予想(月複利・切り捨てで実際の計算と同じ)
+  const table = document.getElementById('forecast-table');
+  let bal = state.bank.balance;
+  const rows = [];
+  const marks = { 12: '1年後', 36: '3年後' };
+  for (let i = 1; i <= 36; i++) {
+    bal += Math.floor(bal * state.bank.annualRate / 100 / 12);
+    if (marks[i]) rows.push({ label: marks[i], value: bal });
+  }
+  table.innerHTML = rows.map(r =>
+    `<tr><td>${r.label}</td><td>${yen(r.value)} <span class="forecast-plus">(+${yen(r.value - state.bank.balance)})</span></td></tr>`
+  ).join('');
+}
+
+let bankMode = 'deposit';
+let bankAmount = 0;
+
+function openBankModal(mode) {
+  bankMode = mode;
+  bankAmount = 0;
+  const isDep = mode === 'deposit';
+  const limit = isDep ? walletBalance() : state.bank.balance;
+  document.getElementById('bank-modal-title').textContent = isDep ? '⬇️ ぎんこうに あずける' : '⬆️ ぎんこうから ひきだす';
+  document.getElementById('bank-modal-limit').textContent =
+    (isDep ? 'おさいふに あるお金: ' : 'あずけているお金: ') + yen(limit);
+  document.getElementById('bank-modal-ok').textContent = isDep ? 'あずける!' : 'ひきだす!';
+  renderBankModalAmount();
+  document.getElementById('bank-modal-bg').classList.add('open');
+}
+function closeBankModal() {
+  document.getElementById('bank-modal-bg').classList.remove('open');
+}
+function renderBankModalAmount() {
+  document.getElementById('bank-modal-amount').textContent = yen(bankAmount);
+}
+
+function confirmBankModal() {
+  const isDep = bankMode === 'deposit';
+  const limit = isDep ? walletBalance() : state.bank.balance;
+  if (bankAmount <= 0) { toast('金がくを 入れてね'); return; }
+  if (bankAmount > limit) {
+    toast(isDep ? 'おさいふのお金より 多いよ💦' : 'あずけているお金より 多いよ💦');
+    return;
+  }
+  const date = todayStr();
+  if (isDep) {
+    state.bank.balance += bankAmount;
+    state.bank.history.push({ id: uid(), date, type: 'deposit', amount: bankAmount, balanceAfter: state.bank.balance });
+    state.wallet.transactions.push({ id: uid(), date, type: 'out', amount: bankAmount, category: TRANSFER_CAT, memo: 'ぎんこうに あずけた' });
+  } else {
+    state.bank.balance -= bankAmount;
+    state.bank.history.push({ id: uid(), date, type: 'withdraw', amount: bankAmount, balanceAfter: state.bank.balance });
+    state.wallet.transactions.push({ id: uid(), date, type: 'in', amount: bankAmount, category: TRANSFER_CAT, memo: 'ぎんこうから ひきだした' });
+  }
+  saveState();
+  closeBankModal();
+  renderBank();
+  toast(isDep ? 'あずけたよ!🏦' : 'ひきだしたよ!👛');
+}
+
+/* ================= りれき ================= */
+let histFilter = 'all';
+
+function setHistFilter(f) {
+  histFilter = f;
+  document.querySelectorAll('.filter-row button').forEach(b => b.classList.toggle('sel', b.dataset.f === f));
+  renderHistory();
+}
+
+function historyItems() {
+  const items = [];
+  if (histFilter === 'all' || histFilter === 'wallet') {
+    state.wallet.transactions.forEach(t => {
+      items.push({
+        date: t.date, id: t.id,
+        icon: t.category === TRANSFER_CAT ? '🏦' : (t.type === 'in' ? '💰' : '🛍️'),
+        title: t.category === TRANSFER_CAT ? t.memo : t.category,
+        sub: t.category === TRANSFER_CAT ? '' : t.memo,
+        sign: t.type === 'in' ? 1 : -1,
+        amount: t.amount,
+      });
+    });
+  }
+  if (histFilter === 'bank') {
+    state.bank.history.forEach(h => {
+      items.push({
+        date: h.date, id: h.id,
+        icon: h.type === 'interest' ? '✨' : h.type === 'deposit' ? '⬇️' : '⬆️',
+        title: h.type === 'interest' ? 'りそく' : h.type === 'deposit' ? 'あずけ入れ' : 'ひき出し',
+        sub: 'のこり ' + yen(h.balanceAfter),
+        sign: h.type === 'withdraw' ? -1 : 1,
+        amount: h.amount,
+      });
+    });
+  }
+  if (histFilter === 'all') {
+    state.bank.history.forEach(h => {
+      if (h.type !== 'interest') return; // 入出金はおさいふ側の記録で表示済み
+      items.push({
+        date: h.date, id: h.id,
+        icon: '✨', title: 'ぎんこうの りそく',
+        sub: 'のこり ' + yen(h.balanceAfter),
+        sign: 1, amount: h.amount,
+      });
+    });
+  }
+  items.sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  return items;
+}
+
+function renderHistory() {
+  const list = document.getElementById('hist-list');
+  const items = historyItems();
+  if (items.length === 0) {
+    list.innerHTML = '<div class="empty-msg">まだ きろくがないよ<br>「きろく」から つけてみよう!</div>';
+    return;
+  }
+  let html = '';
+  let curYm = '';
+  items.forEach(it => {
+    const ym = it.date.slice(0, 7);
+    if (ym !== curYm) {
+      curYm = ym;
+      const [y, m] = ym.split('-');
+      html += `<div class="month-head">${y}年${Number(m)}月</div>`;
+    }
+    const day = Number(it.date.slice(8, 10));
+    html += `
+      <div class="hist-item">
+        <div class="icon">${it.icon}</div>
+        <div class="body">
+          <div class="title">${esc(it.title)}</div>
+          <div class="sub">${day}日${it.sub ? ' ・ ' + esc(it.sub) : ''}</div>
+        </div>
+        <div class="amt ${it.sign > 0 ? 'plus' : 'minus'}">${it.sign > 0 ? '+' : '−'}${yen(it.amount)}</div>
+      </div>`;
+  });
+  list.innerHTML = html;
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* ================= 保護者 ================= */
+let pinBuffer = '';
+let parentUnlocked = false;
+
+function openParent() {
+  goTab('parent');
+  if (parentUnlocked) { showParentContent(); return; }
+  pinBuffer = '';
+  renderPinDots();
+  document.getElementById('pin-title').textContent =
+    state.settings.parentPin ? '暗証番号を入力' : 'はじめに、保護者用の暗証番号(4けた)を決めてください';
+  document.getElementById('parent-lock').style.display = 'block';
+  document.getElementById('parent-content').style.display = 'none';
+}
+
+function renderPinDots() {
+  document.querySelectorAll('#pin-dots span').forEach((s, i) => s.classList.toggle('on', i < pinBuffer.length));
+}
+
+function pinInput(digit) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += digit;
+  renderPinDots();
+  if (pinBuffer.length < 4) return;
+  if (!state.settings.parentPin) {
+    state.settings.parentPin = pinBuffer;
+    saveState();
+    parentUnlocked = true;
+    toast('暗証番号を設定しました');
+    showParentContent();
+  } else if (pinBuffer === state.settings.parentPin) {
+    parentUnlocked = true;
+    showParentContent();
+  } else {
+    toast('番号がちがいます');
+    pinBuffer = '';
+    setTimeout(renderPinDots, 300);
+  }
+}
+
+function showParentContent() {
+  document.getElementById('parent-lock').style.display = 'none';
+  document.getElementById('parent-content').style.display = 'block';
+  const w = walletBalance();
+  const b = state.bank.balance;
+  const totalInterest = state.bank.history.filter(h => h.type === 'interest').reduce((s, h) => s + h.amount, 0);
+  document.getElementById('p-wallet').textContent = yen(w);
+  document.getElementById('p-bank').textContent = yen(b);
+  document.getElementById('p-total').textContent = yen(w + b);
+  document.getElementById('p-interest').textContent = yen(totalInterest);
+  const [ly, lm] = state.bank.lastInterestYm.split('-');
+  document.getElementById('p-last-ym').textContent = `${ly}年${Number(lm)}月`;
+  document.getElementById('p-rate-input').value = state.bank.annualRate;
+  const lb = state.settings.lastBackupAt;
+  document.getElementById('p-last-backup').textContent = lb
+    ? new Date(lb).toLocaleString('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : 'まだありません';
+}
+
+function saveRate() {
+  const v = Number(document.getElementById('p-rate-input').value);
+  if (!isFinite(v) || v < 0 || v > 100) { toast('0〜100の数値を入力してください'); return; }
+  state.bank.annualRate = v;
+  saveState();
+  toast(`年利を ${v}% に設定しました`);
+}
+
+function downloadFile(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+function exportJson() {
+  downloadFile(`okozukai-backup-${todayStr()}.json`, JSON.stringify(state, null, 2), 'application/json');
+  state.settings.lastBackupAt = new Date().toISOString();
+  saveState();
+  showParentContent();
+  toast('バックアップを保存しました');
+}
+
+function csvField(v) {
+  const s = String(v ?? '');
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function buildCsv() {
+  const header = ['日付', '場所', '種類', 'カテゴリ', '入金', '出金', 'メモ', '銀行残高'];
+  const rows = [];
+  state.wallet.transactions.forEach(t => rows.push([
+    t.date, 'おさいふ', t.type === 'in' ? 'もらった' : 'つかった', t.category,
+    t.type === 'in' ? t.amount : '', t.type === 'out' ? t.amount : '', t.memo || '', '',
+  ]));
+  const bankLabel = { deposit: 'あずけ入れ', withdraw: 'ひき出し', interest: 'りそく' };
+  state.bank.history.forEach(h => rows.push([
+    h.date, 'ぎんこう', bankLabel[h.type] || h.type, '',
+    h.type === 'withdraw' ? '' : h.amount, h.type === 'withdraw' ? h.amount : '', '', h.balanceAfter,
+  ]));
+  rows.sort((a, b) => a[0].localeCompare(b[0]));
+  // 先頭の "﻿" は Excel が UTF-8 と認識するための BOM
+  return '﻿' + [header, ...rows].map(r => r.map(csvField).join(',')).join('\r\n');
+}
+
+function exportCsv() {
+  downloadFile(`okozukai-${todayStr()}.csv`, buildCsv(), 'text/csv');
+  toast('CSVを保存しました');
+}
+
+function restoreFromText(raw) {
+  try {
+    const d = JSON.parse(raw);
+    if (!d.wallet || !d.bank) throw new Error('invalid');
+    if (!confirm('現在のデータを上書きして復元します。よろしいですか?')) return;
+    localStorage.setItem(KEY, JSON.stringify(d));
+    loadState();
+    toast('復元しました');
+    showParentContent();
+  } catch (e) {
+    toast('バックアップファイルの形式が正しくありません');
+  }
+}
+
+function restoreFromFile(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => restoreFromText(reader.result);
+  reader.onerror = () => toast('ファイルを読み込めませんでした');
+  reader.readAsText(file);
+}
+
+function resetData() {
+  if (!confirm('すべてのデータを削除します。よろしいですか?')) return;
+  if (!confirm('本当に削除しますか? この操作は取り消せません。')) return;
+  localStorage.removeItem(KEY);
+  loadState();
+  parentUnlocked = false;
+  toast('リセットしました');
+  goTab('home');
+}
+
+function changePin() {
+  const v = document.getElementById('p-new-pin').value.trim();
+  if (!/^\d{4}$/.test(v)) { toast('4けたの数字を入力してください'); return; }
+  state.settings.parentPin = v;
+  saveState();
+  document.getElementById('p-new-pin').value = '';
+  toast('暗証番号を変更しました');
+}
+
+/* ================= 起動 ================= */
+function init() {
+  loadState();
+  // ブラウザによるストレージ自動削除の抑止(対応ブラウザのみ・失敗しても無視)
+  try { navigator.storage?.persist?.(); } catch (e) {}
+  const before = state.bank.lastInterestYm;
+  const total = applyInterest();
+  if (total > 0) showInterestBanner(total, monthsBetween(before, ymNow()));
+  setMascotBubble(total > 0);
+
+  // きろくタブ
+  buildNumpad(document.getElementById('rec-numpad'),
+    () => recAmount, v => { recAmount = v; renderRecAmount(); });
+  setRecType('in');
+  renderRecAmount();
+
+  // 銀行モーダル
+  buildNumpad(document.getElementById('bank-numpad'),
+    () => bankAmount, v => { bankAmount = v; renderBankModalAmount(); });
+
+  // 保護者PINテンキー
+  const pinPad = document.getElementById('pin-numpad');
+  ['1','2','3','4','5','6','7','8','9','','0','del'].forEach(k => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    if (k === '') { b.style.visibility = 'hidden'; }
+    else if (k === 'del') {
+      b.textContent = '⌫';
+      b.className = 'np-del';
+      b.onclick = () => { pinBuffer = pinBuffer.slice(0, -1); renderPinDots(); };
+    } else {
+      b.textContent = k;
+      b.onclick = () => pinInput(k);
+    }
+    pinPad.appendChild(b);
+  });
+
+  renderHome();
+}
+
+init();
+</script>
+</body>
+</html>

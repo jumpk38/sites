@@ -78,6 +78,7 @@ python3 -m http.server 8000
 https://jumpk38.github.io/sites/dice/
 
 `jumpk38/sites` リポジトリの `dice/` ディレクトリに、動作に必要なファイルだけを置いています。
+検索避けとして `<meta name="robots" content="noindex,nofollow">` を入れてあります。
 更新するときは手元で
 
 ```bash

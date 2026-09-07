@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
 <meta name="description" content="ダイスを転がしてそろえて沈める、一人用のパズルゲーム。">
 <meta name="theme-color" content="#0A1211">
 <meta name="color-scheme" content="dark">
@@ -39,7 +40,7 @@
   --font-dis:"Bodoni Moda","Didot","Times New Roman",serif;
   --font-mono:"DM Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box;touch-action:none}
 html,body{height:100%}
 body{
   margin:0;
@@ -185,23 +186,31 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .keys{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;font-size:11.5px;color:var(--muted)}
 .keys kbd{font-family:var(--font-mono);font-size:11px;border:1px solid rgba(236,230,216,.22);
   padding:2px 6px;margin-right:5px;color:var(--ink)}
-.dpad{display:none;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(3,50px);gap:6px}
-.dpad button{border:1px solid rgba(236,230,216,.16);background:rgba(236,230,216,.045);
-  border-radius:3px;display:grid;place-items:center;color:var(--ink);font-size:17px;
-  transition:background .12s,border-color .12s}
-.dpad button:active{background:rgba(224,74,47,.28);border-color:var(--devil)}
+.dpad{
+  --dw:clamp(68px,24vw,108px);
+  --dh:clamp(52px,min(19vw,8.5vh),92px);
+  display:none;grid-template-columns:repeat(3,var(--dw));grid-template-rows:repeat(3,var(--dh));gap:6px}
+.dpad button{position:relative;border:1px solid rgba(236,230,216,.16);background:rgba(236,230,216,.05);
+  border-radius:4px;display:grid;place-items:center;color:var(--ink);font-size:20px;
+  transition:background .1s,border-color .1s}
+/* 見た目より一回り広い当たり判定でボタン間の隙間を埋める */
+.dpad button::after{content:"";position:absolute;inset:-5px}
+.dpad button:active{background:rgba(224,74,47,.3);border-color:var(--devil)}
 .dpad .up{grid-area:1/2}.dpad .left{grid-area:2/1}.dpad .down{grid-area:3/2}.dpad .right{grid-area:2/3}
-@media (hover:none),(pointer:coarse){.keys{display:none}.dpad{display:grid}}
-@media (max-height:620px){.dpad{grid-template-rows:repeat(3,42px);grid-template-columns:repeat(3,52px)}}
-@media (hover:none) and (min-height:700px){
-  .dpad{grid-template-columns:repeat(3,76px);grid-template-rows:repeat(3,66px);gap:8px}
-  .controls{padding-bottom:max(26px,env(safe-area-inset-bottom))}}
+@media (hover:none),(pointer:coarse){
+  .keys{display:none}
+  .dpad{display:grid}
+  .controls{padding-bottom:max(20px,env(safe-area-inset-bottom))}
+  .icon-btn{width:46px;height:46px;font-size:15px}
+  .hud-actions{gap:8px}
+}
 
 /* ---------- overlay ---------- */
 .overlay{position:absolute;inset:0;display:grid;place-items:center;
   background:radial-gradient(80% 70% at 50% 45%,rgba(8,14,13,.84),rgba(6,10,10,.96));
   backdrop-filter:blur(3px);z-index:20;padding:20px;overflow-y:auto}
 .overlay[hidden]{display:none}
+.overlay,.overlay *{touch-action:pan-y}
 .panel{width:min(470px,100%);text-align:center;animation:rise .4s cubic-bezier(.2,.9,.3,1)}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}}
 .title-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.5em;color:var(--devil2);
@@ -290,7 +299,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   <footer class="controls">
     <div class="keys">
       <span><kbd>← ↑ ↓ →</kbd>移動 / 転がす / 押す</span>
-      <span><kbd>P</kbd>ポーズ</span>
+      <span><kbd>P</kbd>ポーズ（やり直しもこの中）</span>
       <span><kbd>R</kbd>やり直し</span>
     </div>
     <div class="dpad">
@@ -383,6 +392,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
       <h2>ポーズ</h2>
       <div class="row" style="margin-top:26px">
         <button class="btn primary" id="btn-resume">つづける</button>
+        <button class="btn" id="btn-restart">やり直す</button>
         <button class="btn" id="btn-quit">モード選択</button>
       </div>
     </div>
@@ -1026,10 +1036,18 @@ $("btn-rules").onclick = () => showPanel("rules");
 $("btn-rules-back").onclick = () => showPanel("title");
 $("btn-pause").onclick = () => pause(!G.paused);
 $("btn-resume").onclick = () => pause(false);
+$("btn-restart").onclick = () => { G.paused = false; start(G.mode); };
 $("btn-quit").onclick = () => { G.running = false; G.paused = false; showPanel("title"); };
 $("btn-retry").onclick = () => start(G.mode);
 $("btn-menu").onclick = () => showPanel("title");
 addEventListener("resize", () => { if(dice) layout(); });
+
+/* 拡大ジェスチャの抑止（十字キー連打がダブルタップ拡大と誤認されるのを防ぐ） */
+for(const t of ["gesturestart","gesturechange","gestureend"])
+  document.addEventListener(t, e => e.preventDefault(), {passive:false});
+document.addEventListener("dblclick", e => e.preventDefault(), {passive:false});
+document.addEventListener("touchmove", e => { if(e.touches.length > 1) e.preventDefault(); },
+                          {passive:false});
 
 /* ============ キャラクター ============ */
 const HERO_SVG = `

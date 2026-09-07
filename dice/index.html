@@ -259,8 +259,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .result .v{font-family:var(--font-dis);font-weight:700;font-size:32px;color:#F3EDE0;
   font-variant-numeric:tabular-nums}
 .newbest{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;color:var(--brass);margin:-14px 0 20px}
-.row{display:flex;gap:10px;justify-content:center}
-.btn{border:1px solid rgba(236,230,216,.22);padding:11px 22px;font-size:13px;letter-spacing:.1em;transition:.16s}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{border:1px solid rgba(236,230,216,.22);padding:11px 22px;font-size:13px;letter-spacing:.1em;
+  white-space:nowrap;transition:.16s}
 .btn:hover{border-color:var(--brass);background:rgba(204,167,92,.1)}
 .btn.primary{background:var(--devil);border-color:var(--devil);color:#fff;font-weight:700}
 .btn.primary:hover{background:var(--devil2);border-color:var(--devil2)}
@@ -268,6 +269,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   .hero.bob svg,.mark{animation:none}
 }
 @media (max-width:430px){
+  .btn{padding:12px 15px;letter-spacing:.04em}
   .mode-btn{flex-wrap:wrap;gap:5px 12px;padding:13px 15px}
   .mode-btn .en{min-width:0;width:100%;font-size:17px}
   .mode-btn .desc{flex:1;font-size:11px}

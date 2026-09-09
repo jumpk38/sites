@@ -431,8 +431,7 @@
   <!-- りれき -->
   <section class="tab" id="tab-history">
     <div class="filter-row">
-      <button data-f="all" class="sel" onclick="setHistFilter('all')">ぜんぶ</button>
-      <button data-f="wallet" onclick="setHistFilter('wallet')">👛 おさいふ</button>
+      <button data-f="wallet" class="sel" onclick="setHistFilter('wallet')">👛 おさいふ</button>
       <button data-f="bank" onclick="setHistFilter('bank')">🏦 ぎんこう</button>
     </div>
     <div id="hist-list"></div>
@@ -852,7 +851,7 @@ function confirmBankModal() {
 }
 
 /* ================= りれき ================= */
-let histFilter = 'all';
+let histFilter = 'wallet';
 
 function setHistFilter(f) {
   histFilter = f;
@@ -860,9 +859,12 @@ function setHistFilter(f) {
   renderHistory();
 }
 
+/* 「おさいふ目線」と「ぎんこう目線」の2つだけを用意する。
+   あずけ入れ/ひき出しは両方に(符号を逆にして)現れ、りそくは ぎんこう にだけ現れる。
+   この2つで全レコードを網羅するため、以前あった「ぜんぶ」は廃止した。 */
 function historyItems() {
   const items = [];
-  if (histFilter === 'all' || histFilter === 'wallet') {
+  if (histFilter === 'wallet') {
     state.wallet.transactions.forEach(t => {
       items.push({
         date: t.date, id: t.id,
@@ -873,8 +875,7 @@ function historyItems() {
         amount: t.amount,
       });
     });
-  }
-  if (histFilter === 'bank') {
+  } else {
     state.bank.history.forEach(h => {
       items.push({
         date: h.date, id: h.id,
@@ -886,17 +887,6 @@ function historyItems() {
       });
     });
   }
-  if (histFilter === 'all') {
-    state.bank.history.forEach(h => {
-      if (h.type !== 'interest') return; // 入出金はおさいふ側の記録で表示済み
-      items.push({
-        date: h.date, id: h.id,
-        icon: '✨', title: 'ぎんこうの りそく',
-        sub: 'のこり ' + yen(h.balanceAfter),
-        sign: 1, amount: h.amount,
-      });
-    });
-  }
   items.sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
   return items;
 }
@@ -905,7 +895,9 @@ function renderHistory() {
   const list = document.getElementById('hist-list');
   const items = historyItems();
   if (items.length === 0) {
-    list.innerHTML = '<div class="empty-msg">まだ きろくがないよ<br>「きろく」から つけてみよう!</div>';
+    list.innerHTML = histFilter === 'bank'
+      ? '<div class="empty-msg">まだ ぎんこうの きろくがないよ<br>「ぎんこう」から あずけてみよう!</div>'
+      : '<div class="empty-msg">まだ きろくがないよ<br>「きろく」から つけてみよう!</div>';
     return;
   }
   let html = '';

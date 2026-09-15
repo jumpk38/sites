@@ -1,6 +1,6 @@
 const CONFIG = {
-  masterUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRKIyvrj-37wkIjtk-sMBxPVrTSuIe-Uj--BO01yr2PObRTuVoeX1RF9t3czvdbpHm2lrJzMnO5P_mX/pub?gid=0&single=true&output=csv',
-  scheduleUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRKIyvrj-37wkIjtk-sMBxPVrTSuIe-Uj--BO01yr2PObRTuVoeX1RF9t3czvdbpHm2lrJzMnO5P_mX/pub?gid=1402356737&single=true&output=csv'
+  masterUrl: 'https://docs.google.com/spreadsheets/***/pub?gid=0&single=true&output=csv',
+  scheduleUrl: 'https://docs.google.com/spreadsheets/***/pub?gid=1402356737&single=true&output=csv'
 };
 
 window.onerror = function(msg, url, line) {

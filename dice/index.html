@@ -140,6 +140,18 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   radial-gradient(circle at 27% 78%,var(--fp) 0 8.6%,var(--fp0) 9.4%),
   radial-gradient(circle at 73% 78%,var(--fp) 0 8.6%,var(--fp0) 9.4%)}
 
+/* ---------- 足元のダイス（斜め視点で3面を見せる） ---------- */
+.info{display:flex;flex-direction:column;align-items:center;gap:1px;flex:0 0 auto;
+  margin-left:clamp(6px,2vw,16px);pointer-events:none;
+  visibility:hidden;transition:opacity .2s;opacity:0}
+.info.on{visibility:visible;opacity:1}
+.info-cube{--is:clamp(28px,7.6vw,38px);--ihalf:calc(var(--is)/2);
+  width:calc(var(--is)*1.45);height:calc(var(--is)*1.4);
+  perspective:300px;display:grid;place-items:center}
+.info-in{position:relative;width:var(--is);height:var(--is);transform-style:preserve-3d;
+  transition:transform .16s cubic-bezier(.34,.05,.3,1)}
+.info-label{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.18em;color:var(--muted)}
+
 /* ---------- cell markers ---------- */
 .mark{position:absolute;left:0;top:0;width:calc(var(--s)*1.6);height:calc(var(--s)*1.6);
   pointer-events:none;animation:pulse 1.2s ease-in-out infinite}
@@ -157,6 +169,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .hero-in svg{width:88%;height:auto;filter:drop-shadow(0 3px 6px rgba(0,0,0,.55))}
 .hero.bob svg{animation:bob 1.7s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7%)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-13%)}
+  55%{transform:translateX(11%)}80%{transform:translateX(-5%)}}
+.hero.shake svg{animation:shake .26s ease-in-out}
 .shadow{position:absolute;left:0;top:0;width:var(--s);height:var(--s);pointer-events:none;
   transition:opacity .15s;
   background:radial-gradient(ellipse 30% 22% at 50% 52%,rgba(0,0,0,.5),rgba(0,0,0,0) 72%)}
@@ -195,12 +210,24 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   transition:background .1s,border-color .1s}
 /* 見た目より一回り広い当たり判定でボタン間の隙間を埋める */
 .dpad button::after{content:"";position:absolute;inset:-5px}
-.dpad button:active{background:rgba(224,74,47,.3);border-color:var(--devil)}
+.dpad button:active,.dpad button.hit{background:rgba(224,74,47,.32);border-color:var(--devil);
+  transition:none}
+.dpad button.miss{background:rgba(224,74,47,.1);border-color:rgba(224,74,47,.45);transition:none}
+.pad-hint{display:none;font-size:11px;letter-spacing:.06em;color:var(--muted);margin:0;
+  transition:opacity .6s}
+.pad-hint.gone{opacity:0}
 .dpad .up{grid-area:1/2}.dpad .left{grid-area:2/1}.dpad .down{grid-area:3/2}.dpad .right{grid-area:2/3}
 @media (hover:none),(pointer:coarse){
   .keys{display:none}
+  .brand{display:none}
+  .info{margin-left:0}
   .dpad{display:grid}
-  .controls{padding-bottom:max(20px,env(safe-area-inset-bottom))}
+  .pad-hint{display:block}
+  /* フッター全体が十字キー。どこを押してもその向きへ1マス */
+  .controls{flex-direction:column;gap:10px;padding-top:18px;
+    padding-bottom:max(20px,env(safe-area-inset-bottom));
+    border-top:1px solid rgba(236,230,216,.07);
+    background:linear-gradient(180deg,rgba(236,230,216,.012),rgba(236,230,216,.05))}
   .icon-btn{width:46px;height:46px;font-size:15px}
   .hud-actions{gap:8px}
 }
@@ -253,7 +280,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .pips span{width:30px;height:30px;border-radius:5px;display:grid;place-items:center;
   font-family:var(--font-mono);font-size:12px;color:#0E1116;background:var(--fbg)}
 .pips span.d1{color:#CE3324}.pips span.d3,.pips span.d6{color:#F0ECE4}
-.result{display:flex;justify-content:center;gap:32px;margin:22px 0 26px;flex-wrap:wrap}
+.result{display:flex;justify-content:center;gap:clamp(18px,5vw,32px);margin:22px 0 26px;flex-wrap:wrap}
 .result div{display:flex;flex-direction:column;gap:3px}
 .result .k{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.2em;color:var(--muted)}
 .result .v{font-family:var(--font-dis);font-weight:700;font-size:32px;color:#F3EDE0;
@@ -269,6 +296,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   .hero.bob svg,.mark{animation:none}
 }
 @media (max-width:430px){
+  .result{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 10px}
   .btn{padding:12px 15px;letter-spacing:.04em}
   .mode-btn{flex-wrap:wrap;gap:5px 12px;padding:13px 15px}
   .mode-btn .en{min-width:0;width:100%;font-size:17px}
@@ -284,6 +312,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 <div class="app" id="app">
   <header class="hud">
     <div class="brand"><span class="brand-x">TUMBLER</span><span class="brand-jp">ダイスタンブラー</span></div>
+    <div class="info" id="info" aria-hidden="true">
+      <span class="info-label">DICE</span>
+      <div class="info-cube"><div class="info-in" id="info-in"></div></div>
+    </div>
     <div class="stats">
       <div class="stat accent"><span class="k">SCORE</span><span class="v" id="v-score">0</span></div>
       <div class="stat"><span class="k">ERASED</span><span class="v mono" id="v-2">0</span></div>
@@ -310,6 +342,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
       <button class="right" data-dir="east" aria-label="右">▶</button>
       <button class="down" data-dir="south" aria-label="下">▼</button>
     </div>
+    <p class="pad-hint" id="pad-hint">このエリアはどこをタップしても動きます</p>
   </footer>
 
   <div class="overlay" id="overlay">
@@ -354,7 +387,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
           <li>隣に<b>ダイスがある</b>ときは転がらない。上を渡って<b>乗り移る</b>だけ。盤の外へは転がせない。</li>
           <li>床に降りてしまったら、目の前の<b>ダイス1個だけ押せる</b>。押されたダイスは向きを変えずにスライドする（押した先が塞がっていれば動かない）。</li>
           <li>床から登れるのは<b class="hi">まだ生えきっていないダイス</b>と<b class="hi">半分ほど沈んだダイス</b>だけ。光っているマスが乗り場の合図。</li>
-          <li>いったん生えかけ／沈みかけのダイスに乗ってしまえば、そこから隣の<b>普通のダイスへはいつでも移れる</b>。</li>
+          <li><b>沈みかけ</b>のダイスに乗れば、そこから隣の<b>普通のダイスへはいつでも移れる</b>。</li>
+          <li><b>生えかけ</b>のダイスの上では、生えきったダイスと同じように隣へ移れる。ただし<b class="hi">4分の3ほど生えるまでは転がせない</b>ので、それまで空きマスの方向へは進めない（＝床には降りられない）。</li>
         </ul>
         <h3>VANISH</h3>
         <ul>
@@ -364,8 +398,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
         <h3>CHAIN</h3>
         <ul>
           <li>沈んでいる最中のダイスも<b>「つながっている数」に入る</b>。同じ目を隣へ持ち込んだ瞬間に n 個以上そろっていれば、後から来たダイスも巻き込まれて沈む（<b>チェイン</b>）。そろっていなければ何も起きない。</li>
-          <li><b>半分ほど沈んだ</b>ダイスの上には、別のダイスを転がして乗せられる（<b class="hi">踏み潰し</b>）。目が同じならこれもチェインになる。押しで乗せることはできない。</li>
-          <li>逆に、半分沈むまではダイスの上から<b>沈みかけの方向へは進めない</b>。</li>
+          <li><b>半分ほど沈んだ</b>ダイスの上には、別のダイスを転がして乗せられる（<b class="hi">踏み潰し</b>）。目が同じならこれもチェインになる。押しで乗せることはできない。まだ浅いうちは、踏み潰さずにそのまま乗り移る。</li>
           <li>チェインが決まると、つながっていた沈みかけダイスが<b class="hi">わずかに持ち上がる</b>。次をつなぐ余裕がその分だけ生まれる。</li>
           <li>沈みかけのマスは<b>金色</b>、生えかけのマスは<b>オレンジ</b>に光る。</li>
         </ul>
@@ -379,7 +412,12 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
         <ul>
           <li><b>エンドレス</b>：一定間隔でダイスがせり上がる（生えきるまで約5秒）。盤面が全部埋まったら終了。</li>
           <li><b>タイムアタック</b>：制限時間3分でスコアを伸ばす。</li>
-          <li>得点 ＝ 目 × 個数 × 10 × チェイン数<br>ハッピーワン ＝ 100 × 個数 × チェイン数</li>
+          <li><b>得点</b>（本家の計算式）<br>
+            バニッシュ ＝ 目 × リンク<br>
+            チェイン ＝ 目 × リンク ×（チェイン数＋1）<br>
+            ハッピーワン ＝ 消した 1 の個数<br>
+            <span style="color:var(--muted)">リンク＝そのとき連結しているダイスの数。バニッシュを0チェイン目と数え、最初のチェインが1チェイン目。<br>
+            1回のチェインで得た点を<b>チェインスコア</b>、その最大値を <b>MCS</b> として記録する。</span></li>
         </ul>
         <p class="src">ルールの検証には
           <a href="https://scrapbox.io/alea-area/XI(s%C3%A1i)_%E5%9F%BA%E6%9C%AC%E3%83%AB%E3%83%BC%E3%83%AB"
@@ -429,6 +467,9 @@ const START_DICE = 18;
 const CRUSH_H     = 0.50;  /* ダイスの上から：ここまで沈めば踏み潰せる／乗れる */
 const CLIMB_DIE   = 0.55;  /* ダイスの上からの登坂力 */
 const CLIMB_FLOOR = 0.62;  /* 床からの登坂力（床→沈みかけダイスの方が少し高い） */
+const ROLL_RISE   = 0.75;  /* これだけ生えれば、生えかけでも転がせる */
+const INFO_TILT   = 46;    /* 足元ダイス表示のカメラ角（上下） */
+const INFO_SPIN   = 26;    /*                      〃 （左右） */
 const CRUSH_MS    = 500;   /* 踏み潰されたダイスが消えるまで */
 const LIFT        = 0.16;  /* チェイン時に沈みかけダイスが浮き上がる高さ */
 const LIFT_MS     = 150;
@@ -461,7 +502,7 @@ let busyUntil = 0, queued = null, bannerEl = null, bannerTimer = 0;
 
 const G = {
   mode:null, running:false, paused:false,
-  score:0, erased:0, level:1, bestChain:0,
+  score:0, erased:0, level:1, bestChain:0, mcs:0,
   spawnAt:0, t0:0, elapsed:0, pauseAt:0
 };
 
@@ -499,13 +540,14 @@ function randOrient(){
 }
 
 /* ============ ダイス ============ */
-function faceTransform(n){
-  if(n[2] === 1)  return "translateZ(var(--half))";
-  if(n[2] === -1) return "rotateX(180deg) translateZ(var(--half))";
-  if(n[0] === 1)  return "rotateY(90deg) translateZ(var(--half))";
-  if(n[0] === -1) return "rotateY(-90deg) translateZ(var(--half))";
-  if(n[1] === 1)  return "rotateX(-90deg) translateZ(var(--half))";
-  return "rotateX(90deg) translateZ(var(--half))";
+function faceTransform(n, halfVar){
+  const h = `translateZ(var(${halfVar || "--half"}))`;
+  if(n[2] === 1)  return h;
+  if(n[2] === -1) return `rotateX(180deg) ${h}`;
+  if(n[0] === 1)  return `rotateY(90deg) ${h}`;
+  if(n[0] === -1) return `rotateY(-90deg) ${h}`;
+  if(n[1] === 1)  return `rotateX(-90deg) ${h}`;
+  return `rotateX(90deg) ${h}`;
 }
 function makeDie(x, y, R, rising){
   const el = document.createElement("div"); el.className = "die";
@@ -541,6 +583,22 @@ function addMark(d, kind){
   d.mark = m;
 }
 function dropMark(d){ if(d.mark){ d.mark.remove(); d.mark = null; } }
+
+/* 転がせるか（生えきっている、または 75% 以上せり上がっている） */
+function canRoll(d){
+  if(!d) return false;
+  if(d.state === "ok") return true;
+  return d.state === "rise" && heightAt(d, performance.now()) >= ROLL_RISE*S;
+}
+/* 転がす直前に、せり上がりを打ち切って地上に出す */
+function finishRise(d){
+  if(d.state !== "rise") return;
+  clearTimeout(d.timer);
+  d.state = "ok"; dropMark(d);
+  d.inn.style.transition = "none";
+  orient(d);
+  void d.inn.offsetWidth;
+}
 
 /* 上面の高さ（0..S） */
 function heightAt(d, now){
@@ -684,35 +742,40 @@ function resolve(moved, riding){
   }
   const groups = findGroups();
   if(!groups.length) return false;
-  let maxChain = 0;
+  let topChain = 0;
   for(const g of groups){
-    const chain = 1 + Math.max(0, ...g.members.filter(m => m.state === "sink").map(m => m.chain));
+    /* mult＝本家の（チェイン数+1）。バニッシュが 0 チェイン目なので mult は 1 から始まる */
+    const mult = 1 + Math.max(0, ...g.members.filter(m => m.state === "sink").map(m => m.chain));
+    const chainNo = mult - 1;
     const fresh = g.members.filter(m => m.state === "ok");
-    const pts = g.val * g.members.length * 10 * chain;
+    /* 本家準拠： 目の数 × リンク（連結数） ×（チェイン数+1） */
+    const pts = g.val * g.members.length * mult;
     G.score += pts; G.erased += fresh.length;
-    if(chain > G.bestChain) G.bestChain = chain;
-    maxChain = Math.max(maxChain, chain);
+    if(chainNo > G.bestChain) G.bestChain = chainNo;
+    if(chainNo >= 1 && pts > G.mcs) G.mcs = pts;   /* MCS＝チェインスコアの最大値 */
+    topChain = Math.max(topChain, chainNo);
     let cx=0, cy=0;
-    for(const m of fresh){ startSink(m, chain); cx += m.x; cy += m.y; }
-    if(chain >= 2) for(const m of g.members) if(m.state === "sink" && !fresh.includes(m)) lift(m);
+    for(const m of fresh){ startSink(m, mult); cx += m.x; cy += m.y; }
+    if(chainNo >= 1) for(const m of g.members) if(m.state === "sink" && !fresh.includes(m)) lift(m);
     popup(cx/fresh.length, cy/fresh.length, "+" + pts);
   }
-  if(maxChain >= 2) banner(`<b>${maxChain}</b> CHAIN`, "");
+  if(topChain >= 1) banner(`<b>${topChain}</b> CHAIN`, "");
   placeHero();
   updateHUD();
   return true;
 }
 function happyOne(moved, riding, near){
-  const chain = 1 + Math.max(0, ...near.map(n => n.chain));
+  const mult = 1 + Math.max(0, ...near.map(n => n.chain));
+  const chainNo = mult - 1;
   const ones = [...dice].filter(d => d.state === "ok" && topOf(d) === 1);
   const spared = riding ? grid[player.y][player.x] : null;   /* 乗っていた 1 は残る */
   const doomed = ones.filter(d => d !== spared);
   if(!doomed.length) return false;
-  const pts = 100 * doomed.length * chain;
+  const pts = doomed.length;            /* 本家準拠：消した 1 の個数がそのまま得点 */
   G.score += pts; G.erased += doomed.length;
-  if(chain > G.bestChain) G.bestChain = chain;
+  if(chainNo > G.bestChain) G.bestChain = chainNo;   /* 得点は個数のみなので MCS には数えない */
   let cx=0, cy=0;
-  for(const d of doomed){ startSink(d, chain); cx += d.x; cy += d.y; }
+  for(const d of doomed){ startSink(d, mult); cx += d.x; cy += d.y; }
   for(const n of near) lift(n);
   popup(cx/doomed.length, cy/doomed.length, "+" + pts);
   banner("HAPPY ONE", "happy");
@@ -736,6 +799,27 @@ function banner(html, cls){
   stage.appendChild(bannerEl);
   clearTimeout(bannerTimer);
   bannerTimer = setTimeout(() => { if(bannerEl){ bannerEl.remove(); bannerEl = null; } }, 1500);
+}
+
+/* ============ 足元のダイス表示 ============ */
+const infoEl = $("info"), infoIn = $("info-in");
+const infoFaces = FACES.map(([n,v]) => {
+  const f = document.createElement("div");
+  f.className = "face f" + v;
+  f.style.transform = faceTransform(n, "--ihalf");
+  infoIn.appendChild(f);
+  return f;
+});
+function updateInfo(){
+  const d = grid[player.y][player.x];
+  if(!d){ infoEl.classList.remove("on"); return; }
+  infoEl.classList.add("on");
+  infoIn.style.transform =
+    `rotateX(${INFO_TILT}deg) rotateZ(${INFO_SPIN}deg) ${m3d(d.R)}`;
+  for(let i=0;i<6;i++){
+    const w = apply(d.R, FACES[i][0]);
+    infoFaces[i].style.filter = "brightness(" + (SHADE[w.join(",")] ?? 1) + ")";
+  }
 }
 
 /* ============ プレイヤー ============ */
@@ -762,55 +846,55 @@ function placeHero(){
     heroShadow.style.opacity = z ? "0" : "1";
   }
   heroShadow.style.transform = `translate3d(${player.x*S}px,${player.y*S}px,1px)`;
+  updateInfo();
 }
 
 /* ============ 移動 ============ */
 function tryMove(dir){
-  if(!G.running || G.paused) return;
+  if(!G.running || G.paused) return false;
   const now = performance.now();
-  if(now < busyUntil){ queued = dir; return; }
+  if(now < busyUntil){ queued = dir; return true; }
   const v = DIRS[dir];
   const nx = player.x+v.dx, ny = player.y+v.dy;
-  if(!inb(nx,ny)) return;
+  if(!inb(nx,ny)) return false;
   const cur = grid[player.y][player.x];
   const tgt = grid[ny][nx];
-  const myH = cur ? heightAt(cur, now) : 0;
+  /* 生えかけのダイスに乗っている間も、生えきったダイスと同じ高さとして扱う */
+  const myH = !cur ? 0 : (cur.state === "sink" ? heightAt(cur, now) : S);
   const climb = cur ? CLIMB_DIE*S : CLIMB_FLOOR*S;
   let acted = false;
 
   if(!tgt){                                             /* 空きマス */
-    if(cur && cur.state === "ok") rollDie(cur, dir);     /* 転がす */
-    acted = true;                                       /* 歩く／乗ったまま／落ちる */
+    if(canRoll(cur)){ rollDie(cur, dir); acted = true; }   /* 転がして一緒に進む */
+    else if(!cur || cur.state === "sink") acted = true;  /* 床を歩く／沈みかけから降りる */
+    /* 生えかけの上：転がせないので、空きマスの方向へは進めない */
   }else{
     const th = heightAt(tgt, now);
-    if(tgt.state === "sink"){
-      if(cur && th > CRUSH_H*S){                        /* まだ沈みが浅い＝進めない */
-        acted = false;
-      }else if(cur && cur.state === "ok"){              /* 踏み潰し */
-        crush(tgt); rollDie(cur, dir); acted = true;
-      }else if(th - myH <= climb){                      /* 沈みかけダイスに乗る */
-        acted = true;
-      }
-    }else if(th - myH <= climb ||
-             (cur && cur.state !== "ok" && tgt.state === "ok")){
-      acted = true;    /* 登れる高さ、または沈みかけ／生えかけの上から生えきったダイスへ */
+    if(canRoll(cur) && tgt.state === "sink" && th <= CRUSH_H*S){
+      crush(tgt); rollDie(cur, dir); acted = true;      /* 踏み潰し */
+    }else if(cur && cur.state === "sink" && tgt.state === "ok"){
+      acted = true;     /* 沈みかけの上からは、生えきったダイスへいつでも移れる */
+    }else if(th - myH <= climb){
+      acted = true;     /* 登れる高さなら乗り移る */
     }else if(!cur && tgt.state === "ok"){               /* 床から：押す（倉庫番） */
       const bx = nx+v.dx, by = ny+v.dy;
       if(inb(bx,by) && !grid[by][bx]){ pushDie(tgt, dir); acted = true; }
     }
   }
-  if(!acted) return;
+  if(!acted) return false;
   busyUntil = now + ROLL_MS;
   player.x = nx; player.y = ny;
   placeHero();
   setTimeout(() => { if(queued){ const q = queued; queued = null; tryMove(q); } },
              Math.max(1, busyUntil - now));
+  return true;
 }
 function moveDieTo(d, nx, ny){
   if(grid[d.y][d.x] === d) grid[d.y][d.x] = null;
   d.x = nx; d.y = ny; grid[ny][nx] = d;
 }
 function rollDie(d, dir){
+  finishRise(d);
   moveDieTo(d, d.x+DIRS[dir].dx, d.y+DIRS[dir].dy);
   d.R = mul(ROT[dir], d.R);
   d.el.style.transformOrigin = ORIGIN[dir];
@@ -926,7 +1010,7 @@ function reset(){
   hero.appendChild(heroIn);
   boardEl.appendChild(hero);
   player = {x:(COLS/2)|0, y:(ROWS/2)|0};
-  Object.assign(G, {score:0, erased:0, level:1, bestChain:0, elapsed:0});
+  Object.assign(G, {score:0, erased:0, level:1, bestChain:0, mcs:0, elapsed:0});
   app.classList.remove("danger");
   if(bannerEl){ bannerEl.remove(); bannerEl = null; }
 }
@@ -950,7 +1034,7 @@ function finish(how){
   G.running = false;
   app.classList.remove("danger");
   const isTA = G.mode === "time";
-  const key = isTA ? "tumbler.best.ta" : "tumbler.best.endless";
+  const key = isTA ? "tumbler.best.ta.v2" : "tumbler.best.endless.v2";
   let best = null, isNew = false;
   try{ best = localStorage.getItem(key); }catch(e){}
   if(best === null || G.score > Number(best)){ isNew = true; save(key, G.score); }
@@ -959,7 +1043,8 @@ function finish(how){
   $("over-stats").innerHTML = [
     ["SCORE", G.score.toLocaleString("en-US")],
     ["ERASED", G.erased],
-    ["MAX CHAIN", G.bestChain]
+    ["MAX CHAIN", G.bestChain],
+    ["MCS", G.mcs.toLocaleString("en-US")]
   ].map(([k,v]) => `<div><span class="k">${k}</span><span class="v">${v}</span></div>`).join("");
   $("over-best").hidden = !isNew;
   showPanel("over"); refreshBests();
@@ -967,7 +1052,7 @@ function finish(how){
 function save(k,v){ try{ localStorage.setItem(k, String(v)); }catch(e){} }
 function refreshBests(){
   let e=null, t=null;
-  try{ e = localStorage.getItem("tumbler.best.endless"); t = localStorage.getItem("tumbler.best.ta"); }catch(err){}
+  try{ e = localStorage.getItem("tumbler.best.endless.v2"); t = localStorage.getItem("tumbler.best.ta.v2"); }catch(err){}
   $("best-endless").textContent = Number(e) > 0 ? "BEST\n" + Number(e).toLocaleString("en-US") : "";
   $("best-time").textContent    = Number(t) > 0 ? "BEST\n" + Number(t).toLocaleString("en-US") : "";
 }
@@ -991,10 +1076,29 @@ function pause(on){
 
 /* ============ 入力 ============ */
 let repTimer = 0, repDelay = 0;
-function press(dir){
-  tryMove(dir);
+const PAD = {north:"up", south:"down", east:"right", west:"left"};
+const dpadEl = document.querySelector(".dpad");
+let padMoves = 0;
+
+/* 押した向きを十字キー上で光らせる。動けなかったらキャラが首を振る */
+function feedback(dir, ok){
+  const b = dpadEl.querySelector("." + PAD[dir]);
+  if(b){
+    b.classList.remove("hit","miss"); void b.offsetWidth;
+    b.classList.add(ok ? "hit" : "miss");
+    setTimeout(() => b.classList.remove("hit","miss"), ok ? 150 : 220);
+  }
+  if(!ok && hero){
+    hero.classList.remove("shake"); void hero.offsetWidth;
+    hero.classList.add("shake");
+    setTimeout(() => hero.classList.remove("shake"), 280);
+  }
+}
+function press(dir, withFeedback){
+  const ok = tryMove(dir);
+  if(withFeedback) feedback(dir, ok);
   clearTimeout(repDelay); clearInterval(repTimer);
-  repDelay = setTimeout(() => { repTimer = setInterval(() => tryMove(dir), 135); }, 270);
+  repDelay = setTimeout(() => { repTimer = setInterval(() => tryMove(dir), 160); }, 400);
 }
 function release(){ clearTimeout(repDelay); clearInterval(repTimer); }
 
@@ -1002,7 +1106,7 @@ const KEYMAP = {ArrowUp:"north", ArrowDown:"south", ArrowLeft:"west", ArrowRight
   w:"north", s:"south", a:"west", d:"east", W:"north", S:"south", A:"west", D:"east"};
 addEventListener("keydown", e => {
   const dir = KEYMAP[e.key];
-  if(dir){ e.preventDefault(); if(!e.repeat) press(dir); return; }
+  if(dir){ e.preventDefault(); if(!e.repeat) press(dir, true); return; }
   if(e.key === " ") e.preventDefault();
   if(e.key === "p" || e.key === "P" || e.key === "Escape") pause(!G.paused);
   if(e.key === "r" || e.key === "R"){ if(G.mode) start(G.mode); }
@@ -1011,23 +1115,38 @@ addEventListener("keydown", e => {
 addEventListener("keyup", e => { if(KEYMAP[e.key]) release(); });
 addEventListener("blur", release);
 
-for(const b of document.querySelectorAll(".dpad button")){
-  b.addEventListener("pointerdown", e => { e.preventDefault(); press(b.dataset.dir); });
-  b.addEventListener("pointerup", release);
-  b.addEventListener("pointercancel", release);
-  b.addEventListener("pointerleave", release);
+/* フッターのどこをタップしても、十字キーの中心から見たその向きへ1マス */
+const controlsEl = document.querySelector(".controls");
+function dirFromPoint(x, y){
+  const r = dpadEl.getBoundingClientRect();
+  if(!r.width) return null;
+  const dx = (x - (r.left + r.width/2)) / (r.width/2);
+  const dy = (y - (r.top + r.height/2)) / (r.height/2);
+  return Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "east" : "west") : (dy > 0 ? "south" : "north");
 }
+controlsEl.addEventListener("pointerdown", e => {
+  const dir = dirFromPoint(e.clientX, e.clientY);
+  if(!dir) return;
+  e.preventDefault();
+  try{ controlsEl.setPointerCapture(e.pointerId); }catch(err){}
+  press(dir, true);
+  if(++padMoves === 5) $("pad-hint").classList.add("gone");
+});
+controlsEl.addEventListener("pointerup", release);
+controlsEl.addEventListener("pointercancel", release);
+
 let sw = null;
 stage.addEventListener("pointerdown", e => {
-  sw = {x:e.clientX, y:e.clientY};
+  sw = {x:e.clientX, y:e.clientY, used:false};
   try{ stage.setPointerCapture(e.pointerId); }catch(err){}
 });
 stage.addEventListener("pointermove", e => {
-  if(!sw) return;
-  const dx = e.clientX-sw.x, dy = e.clientY-sw.y, th = Math.max(22, S*0.55);
+  if(!sw || sw.used) return;                 /* 1回のなぞりにつき1マスだけ */
+  const dx = e.clientX-sw.x, dy = e.clientY-sw.y, th = Math.max(26, S*0.7);
   if(Math.abs(dx) < th && Math.abs(dy) < th) return;
-  tryMove(Math.abs(dx) > Math.abs(dy) ? (dx>0?"east":"west") : (dy>0?"south":"north"));
-  sw = {x:e.clientX, y:e.clientY};
+  const dir = Math.abs(dx) > Math.abs(dy) ? (dx>0?"east":"west") : (dy>0?"south":"north");
+  sw.used = true;
+  feedback(dir, tryMove(dir));
 });
 const endSwipe = () => { sw = null; };
 stage.addEventListener("pointerup", endSwipe);
